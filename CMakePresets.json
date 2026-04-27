@@ -1,0 +1,164 @@
+{
+    "version": 10,
+    "cmakeMinimumRequired": {
+        "major": 4,
+        "minor": 3,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "msvc145",
+            "hidden": true,
+            "generator": "Visual Studio 18 2026",
+            "toolset": "v145",
+            "cacheVariables": {
+                "CMAKE_VERBOSE_MAKEFILE": "ON",
+                "CMAKE_C_STANDARD": "23",
+                "CMAKE_C_STANDARD_REQUIRED": "ON",
+                "CMAKE_C_EXTENSIONS": "OFF",
+                "CMAKE_CXX_STANDARD": "23",
+                "CMAKE_CXX_STANDARD_REQUIRED": "ON",
+                "CMAKE_CXX_EXTENSIONS": "OFF",
+                "CMAKE_SYSTEM_NAME": "Windows",
+                "TARGET_VENDOR": "microsoft"
+            }
+        },
+        {
+            "name": "msvc145-nt10.0",
+            "hidden": true,
+            "inherits": "msvc145",
+            "cacheVariables": {
+                "TARGET_SYSTEM": "nt10.0"
+            }
+        },
+        {
+            "name": "msvc145-nt10.0-x64",
+            "displayName": "Windows NT 10.0 (x64)",
+            "description": "Configure MSVC (v14.4) for Windows NT 10.0 (x64)",
+            "inherits": "msvc145-nt10.0",
+            "binaryDir": "${sourceDir}/target/msvc145-nt10.0-x64",
+            "architecture": "x64",
+            "cacheVariables": {
+                "TARGET_ARCHITECTURE": "x64"
+            }
+        },
+        {
+            "name": "msvc145-nt10.0-arm64",
+            "displayName": "Windows NT 10.0 (ARM64)",
+            "description": "Configure MSVC (v14.4) for Windows NT 10.0 (ARM64)",
+            "inherits": "msvc145-nt10.0",
+            "binaryDir": "${sourceDir}/target/msvc145-nt10.0-arm64",
+            "architecture": "arm64",
+            "cacheVariables": {
+                "TARGET_ARCHITECTURE": "arm64"
+            }
+        },
+        {
+            "name": "aclang17",
+            "hidden": true,
+            "generator": "Xcode",
+            "cacheVariables": {
+                "CMAKE_VERBOSE_MAKEFILE": "ON",
+                "CMAKE_C_STANDARD": "23",
+                "CMAKE_C_STANDARD_REQUIRED": "ON",
+                "CMAKE_C_EXTENSIONS": "OFF",
+                "CMAKE_C_COMPILER": "/usr/bin/clang",
+                "CMAKE_CXX_STANDARD": "23",
+                "CMAKE_CXX_STANDARD_REQUIRED": "ON",
+                "CMAKE_CXX_EXTENSIONS": "OFF",
+                "CMAKE_CXX_COMPILER": "/usr/bin/clang++",
+                "CMAKE_SYSTEM_NAME": "Darwin",
+                "CMAKE_OSX_DEPLOYMENT_TARGET": "15.7",
+                "TARGET_VENDOR": "apple"
+            }
+        },
+        {
+            "name": "aclang17-darwin246",
+            "hidden": true,
+            "inherits": "aclang17",
+            "cacheVariables": {
+                "TARGET_SYSTEM": "darwin246"
+            }
+        },
+        {
+            "name": "aclang17-darwin246-x64",
+            "displayName": "macOS Darwin 24.5 (x64)",
+            "description": "Configure Clang (v17) for macOS Darwin 24.5 (x64)",
+            "inherits": "aclang17-darwin246",
+            "binaryDir": "${sourceDir}/target/aclang17-darwin246-x64",
+            "cacheVariables": {
+                "CMAKE_OSX_ARCHITECTURES": "x86_64",
+                "TARGET_ARCHITECTURE": "x64"
+            }
+        },
+        {
+            "name": "aclang17-darwin246-arm64",
+            "displayName": "macOS Darwin 24.5 (ARM64)",
+            "description": "Configure Clang (v17) for macOS Darwin 24.5 (ARM64)",
+            "inherits": "aclang17-darwin246",
+            "binaryDir": "${sourceDir}/target/aclang17-darwin246-arm64",
+            "cacheVariables": {
+                "CMAKE_OSX_ARCHITECTURES": "arm64",
+                "TARGET_ARCHITECTURE": "arm64"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "msvc145-nt10.0-x64-debug",
+            "configuration": "Debug",
+            "configurePreset": "msvc145-nt10.0-x64",
+            "displayName": "Debug",
+            "description": "Build with MSVC (v14.4) for Windows NT 10.0 (x64)"
+        },
+        {
+            "name": "msvc145-nt10.0-x64-release",
+            "configuration": "Release",
+            "configurePreset": "msvc145-nt10.0-x64",
+            "displayName": "Release",
+            "description": "Build with MSVC (v14.4) for Windows NT 10.0 (x64)"
+        },
+        {
+            "name": "msvc145-nt10.0-arm64-debug",
+            "configuration": "Debug",
+            "configurePreset": "msvc145-nt10.0-arm64",
+            "displayName": "Debug",
+            "description": "Build with MSVC (v14.4) for Windows NT 10.0 (ARM64)"
+        },
+        {
+            "name": "msvc145-nt10.0-arm64-release",
+            "configuration": "Release",
+            "configurePreset": "msvc145-nt10.0-arm64",
+            "displayName": "Release",
+            "description": "Build with MSVC (v14.4) for Windows NT 10.0 (ARM64)"
+        },
+        {
+            "name": "aclang17-darwin246-x64-debug",
+            "configuration": "Debug",
+            "configurePreset": "aclang17-darwin246-x64",
+            "displayName": "Debug",
+            "description": "Build with Clang (v17) for macOS Darwin 24.5 (x64)"
+        },
+        {
+            "name": "aclang17-darwin246-x64-release",
+            "configuration": "Release",
+            "configurePreset": "aclang17-darwin246-x64",
+            "displayName": "Release",
+            "description": "Build with Clang (v17) for macOS Darwin 24.5 (x64)"
+        },
+        {
+            "name": "aclang17-darwin246-arm64-debug",
+            "configuration": "Debug",
+            "configurePreset": "aclang17-darwin246-arm64",
+            "displayName": "Debug",
+            "description": "Build with Clang (v17) for macOS Darwin 24.5 (ARM64)"
+        },
+        {
+            "name": "aclang17-darwin246-arm64-release",
+            "configuration": "Release",
+            "configurePreset": "aclang17-darwin246-arm64",
+            "displayName": "Release",
+            "description": "Build with Clang (v17) for macOS Darwin 24.5 (ARM64)"
+        }
+    ]
+}
