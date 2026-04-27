@@ -3,6 +3,10 @@
 
 #include <limits.h>
 
+/* -------------------------------------------------------------------------------------------------
+ * C API :: NUMERICS
+ * ------------------------------------------------------------------------------------------------- */
+
 /* CHAR_BIT */
 #if (CHAR_BIT != 8)
     #error "CATCRLIB.h :: Unsupported Platform :: Platform must contain 8-bit bytes (CHAR_BIT == 8)."
