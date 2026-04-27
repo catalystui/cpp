@@ -2,7 +2,7 @@
 #define CATCRLIB_H
 #ifdef __cplusplus
 extern "C" {
-namespace cat {
+namespace catalyst {
 #endif
 
 #include "CMAKECFG.h"
@@ -69,7 +69,7 @@ typedef BYTE BOOL;
 typedef void VOID;
 
 #ifdef __cplusplus
-} /* namespace cat */
+} /* namespace catalyst */
 } /* extern C */
 #endif
 #endif /* CATCRLIB_H */
