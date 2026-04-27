@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 4.3.0)
 project(CATLIB C CXX)
+include_directories("${CMAKE_SOURCE_DIR}/include")
 include(${CMAKE_SOURCE_DIR}/CMakeInit.cmake REQUIRED)
 metadata("CATLIB" 1 0 0 "alpha.1" "Libraries, frameworks, and official utilities based on the CatalystUI Model written in C and C++.")
 configure("${TARGET_VENDOR}" "${TARGET_SYSTEM}" "${TARGET_ARCHITECTURE}")
@@ -31,3 +32,9 @@ configure_file(
 	@ONLY
 )
 include_directories("${CMAKE_SOURCE_DIR}/target/generated")
+
+# CRYSTAL
+add_library(CRYSTAL SHARED
+	src/modules/crystal/CRYSTAL.cpp
+)
+set_target_properties(CRYSTAL PROPERTIES PREFIX "")

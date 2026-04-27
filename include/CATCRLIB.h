@@ -13,7 +13,15 @@ namespace catalyst {
 #endif
 
 #include <float.h>
-#include <assert.h>
+
+// CONSTEXPR Support
+#if defined(__cplusplus)
+    #if __cplusplus >= 201103L
+        #define CONSTEXPR constexpr
+    #else
+        #define CONSTEXPR
+    #endif
+#endif
 
 /* -------------------------------------------------------------------------------------------------
  * C API :: NUMERICS
@@ -39,27 +47,27 @@ typedef BYTE BOOL;
 #define TRUE    (BOOL) 1
 #define FALSE   (BOOL) 0
 
-#ifndef __SIZEOF_VOID_P__
-    #error "CATCRLIB.h :: Unsupported Platform :: Unable to determine pointer size, __SIZEOF_VOID_P__ was not defined."
+#ifndef CMAKECFG_SIZEOF_VOID_P
+    #error "CATCRLIB.h :: Unsupported Platform :: Unable to determine pointer size, CMAKECFG_SIZEOF_VOID_P was not defined."
 #endif
-#if __SIZEOF_VOID_P__ == 1
+#if CMAKECFG_SIZEOF_VOID_P == 1
     typedef SBYTE NINT;
     typedef BYTE NUINT;
-#elif __SIZEOF_VOID_P__ == 2
+#elif CMAKECFG_SIZEOF_VOID_P == 2
     #if CATCRLIB_SUPPORTS_16BIT
         typedef SHORT NINT;
         typedef USHORT NUINT;
     #else
         #error "CATCRLIB.h :: Unsupported Platform :: Compiler specifies 16-bit pointers but no 16-bit integer type exists."
     #endif
-#elif __SIZEOF_VOID_P__ == 4
+#elif CMAKECFG_SIZEOF_VOID_P == 4
     #if CATCRLIB_SUPPORTS_32BIT
         typedef INT NINT;
         typedef UINT NUINT;
     #else
         #error "CATCRLIB.h :: Unsupported Platform :: Compiler specifies 32-bit pointers but no 32-bit integer type exists."
     #endif
-#elif __SIZEOF_VOID_P__ == 8
+#elif CMAKECFG_SIZEOF_VOID_P == 8
     #if CATCRLIB_SUPPORTS_64BIT
         typedef LONG NINT;
         typedef ULONG NUINT;
