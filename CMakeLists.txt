@@ -33,8 +33,43 @@ configure_file(
 )
 include_directories("${CMAKE_SOURCE_DIR}/target/generated")
 
+# CATMMLIB
+add_library(CATMMLIB SHARED
+	src/CATMMLIB.cpp
+)
+set_target_properties(CATMMLIB PROPERTIES PREFIX "")
+
 # CRYSTAL
 add_library(CRYSTAL SHARED
 	src/modules/crystal/CRYSTAL.cpp
 )
 set_target_properties(CRYSTAL PROPERTIES PREFIX "")
+
+# TEST
+if(EXISTS "${CMAKE_SOURCE_DIR}/test")
+    file(GLOB TEST_SOURCES CONFIGURE_DEPENDS
+        "${CMAKE_SOURCE_DIR}/test/*.cpp"
+    )
+    if(TEST_SOURCES)
+        message(STATUS "Test source files found, configuring test executables...")
+        foreach(TEST_SOURCE ${TEST_SOURCES})
+            get_filename_component(TEST_NAME "${TEST_SOURCE}" NAME_WE)
+            add_executable(${TEST_NAME}
+                "${TEST_SOURCE}"
+            )
+            target_link_libraries(${TEST_NAME}
+                CATMMLIB
+            )
+			message(STATUS "Configured test executable ${TEST_NAME}")
+        endforeach()
+    else()
+        message(STATUS "No .cpp test source files found, skipping test executable configuration")
+        message(STATUS "    To configure test executables, add one or more .cpp files")
+        message(STATUS "    to the 'test' directory, then reload the CMake configuration.")
+    endif()
+else()
+    message(STATUS "No test directory found, skipping test executable configuration")
+    message(STATUS "    To configure test executables, create a 'test' directory")
+    message(STATUS "    in the project root and add one or more .cpp files,")
+    message(STATUS "    then reload the CMake configuration.")
+endif()

@@ -2,6 +2,7 @@
 # CATLIB #
 ##########
 target/
+test/test.cpp
 
 #####
 # C #

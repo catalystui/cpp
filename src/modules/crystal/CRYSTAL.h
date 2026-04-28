@@ -16,6 +16,10 @@ typedef struct CRYSTALnative {
 
 typedef struct CRYSTALwindow CRYSTALwindow;
 
+CRYSTALwindow* crystalCreateWindow(RESULT* result);
+
+void crystalDestroyWindow(CRYSTALwindow* window);
+
 #ifdef __cplusplus
 } /* namespace crystal */
 } /* namespace modules */

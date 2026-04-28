@@ -1,9 +1,5 @@
 #ifndef CATCRLIB_H
 #define CATCRLIB_H
-#ifdef __cplusplus
-extern "C" {
-namespace catalyst {
-#endif
 
 #include "CMAKECFG.h"
 #if defined(CMAKECFG_STDC_VERSION) && (CMAKECFG_STDC_VERSION >= 199901L)
@@ -14,12 +10,12 @@ namespace catalyst {
 
 #include <float.h>
 
-// CONSTEXPR Support
+/* CONSTEXPR Support */
 #if defined(__cplusplus)
     #if __cplusplus >= 201103L
-        #define CONSTEXPR constexpr
+        #define CATALYST_CONSTEXPR constexpr
     #else
-        #define CONSTEXPR
+        #define CATALYST_CONSTEXPR
     #endif
 #endif
 
@@ -29,48 +25,48 @@ namespace catalyst {
 
 #if (FLT_RADIX == 2 && FLT_MANT_DIG == 24 && FLT_MIN_EXP == -125 && FLT_MAX_EXP == 128)
     #define CATCRLIB_SUPPORTS_SINGLE 1
-    typedef char CATCRLIB_requires_float_4_bytes[(sizeof(float) == 4) ? 1 : -1]; // Compile-time check for 32-bit float
-    typedef float SINGLE;
+    typedef char CATCRLIB_requires_float_4_bytes[(sizeof(float) == 4) ? 1 : -1]; /* Compile-time check for 32-bit float */
+    typedef float CATALYST_SINGLE;
 #else
     #define CATCRLIB_SUPPORTS_SINGLE 0
 #endif
 
 #if (FLT_RADIX == 2 && DBL_MANT_DIG == 53 && DBL_MIN_EXP == -1021 && DBL_MAX_EXP == 1024)
     #define CATCRLIB_SUPPORTS_DOUBLE 1
-    typedef char CATCRLIB_requires_double_8_bytes[(sizeof(double) == 8) ? 1 : -1]; // Compile-time check for 64-bit double
-    typedef double DOUBLE;
+    typedef char CATCRLIB_requires_double_8_bytes[(sizeof(double) == 8) ? 1 : -1]; /* Compile-time check for 64-bit double */
+    typedef double CATALYST_DOUBLE;
 #else
     #define CATCRLIB_SUPPORTS_DOUBLE 0
 #endif
 
-typedef BYTE BOOL;
-#define TRUE    (BOOL) 1
-#define FALSE   (BOOL) 0
+typedef CATALYST_BYTE CATALYST_BOOL;
+#define CATALYST_TRUE    ((CATALYST_BOOL) 1)
+#define CATALYST_FALSE   ((CATALYST_BOOL) 0)
 
 #ifndef CMAKECFG_SIZEOF_VOID_P
     #error "CATCRLIB.h :: Unsupported Platform :: Unable to determine pointer size, CMAKECFG_SIZEOF_VOID_P was not defined."
 #endif
 #if CMAKECFG_SIZEOF_VOID_P == 1
-    typedef SBYTE NINT;
-    typedef BYTE NUINT;
+    typedef CATALYST_SBYTE  CATALYST_NINT;
+    typedef CATALYST_BYTE   CATALYST_NUINT;
 #elif CMAKECFG_SIZEOF_VOID_P == 2
     #if CATCRLIB_SUPPORTS_16BIT
-        typedef SHORT NINT;
-        typedef USHORT NUINT;
+        typedef CATALYST_SHORT  CATALYST_NINT;
+        typedef CATALYST_USHORT CATALYST_NUINT;
     #else
         #error "CATCRLIB.h :: Unsupported Platform :: Compiler specifies 16-bit pointers but no 16-bit integer type exists."
     #endif
 #elif CMAKECFG_SIZEOF_VOID_P == 4
     #if CATCRLIB_SUPPORTS_32BIT
-        typedef INT NINT;
-        typedef UINT NUINT;
+        typedef CATALYST_INT    CATALYST_NINT;
+        typedef CATALYST_UINT   CATALYST_NUINT;
     #else
         #error "CATCRLIB.h :: Unsupported Platform :: Compiler specifies 32-bit pointers but no 32-bit integer type exists."
     #endif
 #elif CMAKECFG_SIZEOF_VOID_P == 8
     #if CATCRLIB_SUPPORTS_64BIT
-        typedef LONG NINT;
-        typedef ULONG NUINT;
+        typedef CATALYST_LONG   CATALYST_NINT;
+        typedef CATALYST_ULONG  CATALYST_NUINT;
     #else
         #error "CATCRLIB.h :: Unsupported Platform :: Compiler specifies 64-bit pointers but no 64-bit integer type exists."
     #endif
@@ -82,126 +78,112 @@ typedef BYTE BOOL;
  * C API :: TEXT ENCODING
  * ------------------------------------------------------------------------------------------------- */
 
-typedef BYTE TEXT_ENCODING;
+typedef CATALYST_BYTE CATALYST_TEXT_ENCODING;
 
 enum {
-    TEXT_ENCODING_UNKNOWN = 0x0,
-    TEXT_ENCODING_ASCII   = 0x1,
-    TEXT_ENCODING_CP1252  = 0x2,
-    TEXT_ENCODING_UTF8    = 0x3,
-    TEXT_ENCODING_UTF16LE = 0x4
+    CATALYST_TEXT_ENCODING_UNKNOWN = 0x0,
+    CATALYST_TEXT_ENCODING_ASCII   = 0x1,
+    CATALYST_TEXT_ENCODING_CP1252  = 0x2,
+    CATALYST_TEXT_ENCODING_UTF8    = 0x3,
+    CATALYST_TEXT_ENCODING_UTF16LE = 0x4
 };
 
-typedef struct CODEPOINT {
-    BYTE byte0; /* Most significant byte */
-    BYTE byte1;
-    BYTE byte2;
-    BYTE byte3; /* Least significant byte */
-} CODEPOINT;
+typedef struct CATALYST_CODEPOINT {
+    CATALYST_BYTE byte0; /* Most significant byte */
+    CATALYST_BYTE byte1;
+    CATALYST_BYTE byte2;
+    CATALYST_BYTE byte3; /* Least significant byte */
+} CATALYST_CODEPOINT;
 
-typedef BYTE ASCII_CODE_UNIT;
-typedef ASCII_CODE_UNIT* ASCIIW;
-typedef const ASCII_CODE_UNIT* ASCII;
+typedef CATALYST_BYTE CATALYST_ASCII_CODE_UNIT;
+typedef CATALYST_ASCII_CODE_UNIT* CATALYST_ASCIIW;
+typedef const CATALYST_ASCII_CODE_UNIT* CATALYST_ASCII;
 
-typedef BYTE CP1252_CODE_UNIT;
-typedef CP1252_CODE_UNIT* CP1252W;
-typedef const CP1252_CODE_UNIT* CP1252;
+typedef CATALYST_BYTE CATALYST_CP1252_CODE_UNIT;
+typedef CATALYST_CP1252_CODE_UNIT* CATALYST_CP1252W;
+typedef const CATALYST_CP1252_CODE_UNIT* CATALYST_CP1252;
 
-typedef BYTE UTF8_CODE_UNIT;
-typedef UTF8_CODE_UNIT* UTF8W;
-typedef const UTF8_CODE_UNIT* UTF8;
+typedef CATALYST_BYTE CATALYST_UTF8_CODE_UNIT;
+typedef CATALYST_UTF8_CODE_UNIT* CATALYST_UTF8W;
+typedef const CATALYST_UTF8_CODE_UNIT* CATALYST_UTF8;
 
-typedef struct UTF16LE_CODE_UNIT {
-    BYTE msb; /* Most significant byte of the code unit. */
-    BYTE lsb; /* Least significant byte of the code unit. */
+typedef struct CATALYST_UTF16LE_CODE_UNIT {
+    CATALYST_BYTE msb; /* Most significant byte of the code unit. */
+    CATALYST_BYTE lsb; /* Least significant byte of the code unit. */
 
     #if defined(__cplusplus)
-        CONSTEXPR UTF16LE_CODE_UNIT() : msb(0), lsb(0) {}
-        CONSTEXPR UTF16LE_CODE_UNIT(BYTE msb, BYTE lsb) : msb(msb), lsb(lsb) {}
+        CATALYST_CONSTEXPR CATALYST_UTF16LE_CODE_UNIT() : msb(0), lsb(0) {}
+        CATALYST_CONSTEXPR CATALYST_UTF16LE_CODE_UNIT(CATALYST_BYTE msb, CATALYST_BYTE lsb) : msb(msb), lsb(lsb) {}
         #if CATCRLIB_SUPPORTS_16BIT
-            explicit CONSTEXPR UTF16LE_CODE_UNIT(USHORT value) : msb((BYTE) ((value >> 8) & (USHORT) 0x00FFu)), lsb((BYTE) (value & (USHORT) 0x00FFu)) {}
-            CONSTEXPR operator USHORT() const {
-                return ((USHORT) msb << 8) | (USHORT) lsb;
+            explicit CATALYST_CONSTEXPR CATALYST_UTF16LE_CODE_UNIT(CATALYST_USHORT value) : msb((CATALYST_BYTE) ((value >> 8) & (CATALYST_USHORT) 0x00FFu)), lsb((CATALYST_BYTE) (value & (CATALYST_USHORT) 0x00FFu)) {}
+            CATALYST_CONSTEXPR operator CATALYST_USHORT() const {
+                return ((CATALYST_USHORT) msb << 8) | (CATALYST_USHORT) lsb;
             }
         #endif
     #endif
-} UTF16LE_CODE_UNIT;
-typedef UTF16LE_CODE_UNIT* UTF16LEW;
-typedef const UTF16LE_CODE_UNIT* UTF16LE;
+} CATALYST_UTF16LE_CODE_UNIT;
+typedef CATALYST_UTF16LE_CODE_UNIT* CATALYST_UTF16LEW;
+typedef const CATALYST_UTF16LE_CODE_UNIT* CATALYST_UTF16LE;
 
 /* -------------------------------------------------------------------------------------------------
  * C API :: OPERATION STATUS
  * ------------------------------------------------------------------------------------------------- */
 
-typedef BYTE STATUS_CODE;
+typedef CATALYST_BYTE CATALYST_STATUS_CODE;
 
 enum {
-    STATUS_CODE_SUCCESS_NONE = 0x00,
-    STATUS_CODE_SUCCESS_NOOP = 0x01,
+    CATALYST_STATUS_CODE_SUCCESS      = 0x00,
+    CATALYST_STATUS_CODE_SUCCESS_NOOP = 0x01,
 
-    STATUS_CODE_WARNING_NONE       = 0x40,
-    STATUS_CODE_WARNING_PARTIAL    = 0x41,
-    STATUS_CODE_WARNING_DEPRECATED = 0x42,
+    CATALYST_STATUS_CODE_WARNING            = 0x40,
+    CATALYST_STATUS_CODE_WARNING_PARTIAL    = 0x41,
+    CATALYST_STATUS_CODE_WARNING_DEPRECATED = 0x42,
 
-    STATUS_CODE_ERROR_NONE                 = 0x80,
-    STATUS_CODE_ERROR_INVALID_ARGUMENT     = 0x81,
-    STATUS_CODE_ERROR_INVALID_STATE        = 0x82,
-    STATUS_CODE_ERROR_MALFORMED_INPUT      = 0x83,
-    STATUS_CODE_ERROR_ACCESS_DENIED        = 0x84,
-    STATUS_CODE_ERROR_NOT_IMPLEMENTED      = 0x85,
-    STATUS_CODE_ERROR_SYSTEM_NOT_SUPPORTED = 0x86,
-    STATUS_CODE_ERROR_TIMEOUT              = 0x87,
-    STATUS_CODE_ERROR_NOT_FOUND            = 0x88,
-    STATUS_CODE_ERROR_INTERRUPTED          = 0x89,
-    STATUS_CODE_ERROR_BUFFER_OVERFLOW      = 0x90,
-    STATUS_CODE_ERROR_ALLOCATION_FAILED    = 0x91,
-    STATUS_CODE_ERROR_IO_ERROR             = 0xA0,
+    CATALYST_STATUS_CODE_ERROR                      = 0x80,
+    CATALYST_STATUS_CODE_ERROR_INVALID_ARGUMENT     = 0x81,
+    CATALYST_STATUS_CODE_ERROR_INVALID_STATE        = 0x82,
+    CATALYST_STATUS_CODE_ERROR_MALFORMED_INPUT      = 0x83,
+    CATALYST_STATUS_CODE_ERROR_ACCESS_DENIED        = 0x84,
+    CATALYST_STATUS_CODE_ERROR_NOT_IMPLEMENTED      = 0x85,
+    CATALYST_STATUS_CODE_ERROR_SYSTEM_NOT_SUPPORTED = 0x86,
+    CATALYST_STATUS_CODE_ERROR_TIMEOUT              = 0x87,
+    CATALYST_STATUS_CODE_ERROR_NOT_FOUND            = 0x88,
+    CATALYST_STATUS_CODE_ERROR_INTERRUPTED          = 0x89,
+    CATALYST_STATUS_CODE_ERROR_BUFFER_OVERFLOW      = 0x90,
+    CATALYST_STATUS_CODE_ERROR_ALLOCATION_FAILED    = 0x91,
+    CATALYST_STATUS_CODE_ERROR_IO_ERROR             = 0xA0,
 
-    STATUS_CODE_FATAL_NONE                 = 0xC0,
-    STATUS_CODE_FATAL_INVARIANT_VIOLATION  = 0xC1
+    CATALYST_STATUS_CODE_FATAL                      = 0xC0,
+    CATALYST_STATUS_CODE_FATAL_INVARIANT_VIOLATION  = 0xC1
 };
 
-#define STATUS_CODE_LEVEL_MASK ((STATUS_CODE) 0xC0)
+#define CATALYST_STATUS_CODE_LEVEL_MASK ((CATALYST_STATUS_CODE) 0xC0)
 
-#define STATUS_CODE_IS_SUCCESS(status) ((((STATUS_CODE) (status)) & STATUS_CODE_LEVEL_MASK) == STATUS_CODE_SUCCESS_NONE)
-#define STATUS_CODE_IS_WARNING(status) ((((STATUS_CODE) (status)) & STATUS_CODE_LEVEL_MASK) == STATUS_CODE_WARNING_NONE)
-#define STATUS_CODE_IS_ERROR(status) ((((STATUS_CODE) (status)) & STATUS_CODE_LEVEL_MASK) == STATUS_CODE_ERROR_NONE)
-#define STATUS_CODE_IS_FATAL(status) ((((STATUS_CODE) (status)) & STATUS_CODE_LEVEL_MASK) == STATUS_CODE_FATAL_NONE)
+#define CATALYST_STATUS_CODE_IS_SUCCESS(status) ((((CATALYST_STATUS_CODE) (status)) & CATALYST_STATUS_CODE_LEVEL_MASK) == CATALYST_STATUS_CODE_SUCCESS)
+#define CATALYST_STATUS_CODE_IS_WARNING(status) ((((CATALYST_STATUS_CODE) (status)) & CATALYST_STATUS_CODE_LEVEL_MASK) == CATALYST_STATUS_CODE_WARNING)
+#define CATALYST_STATUS_CODE_IS_ERROR(status) ((((CATALYST_STATUS_CODE) (status)) & CATALYST_STATUS_CODE_LEVEL_MASK) == CATALYST_STATUS_CODE_ERROR)
+#define CATALYST_STATUS_CODE_IS_FATAL(status) ((((CATALYST_STATUS_CODE) (status)) & CATALYST_STATUS_CODE_LEVEL_MASK) == CATALYST_STATUS_CODE_FATAL)
 
-typedef BYTE CONTEXT_CODE;
+typedef CATALYST_BYTE CATALYST_CONTEXT_CODE;
+typedef CATALYST_BYTE CATALYST_OPERATION_CODE;
+typedef CATALYST_BYTE CATALYST_DETAIL_CODE;
 
-typedef BYTE OPERATION_CODE;
-
-typedef BYTE DETAIL_CODE;
-
-typedef BYTE CONTEXT_CODE;
-typedef BYTE OPERATION_CODE;
-typedef BYTE DETAIL_CODE;
-
-#define CONTEXT_CODE_NONE   ((CONTEXT_CODE) 0x00)
-#define OPERATION_CODE_NONE ((OPERATION_CODE) 0x00)
-#define DETAIL_CODE_NONE    ((DETAIL_CODE) 0x00)
-
-typedef struct RESULT {
-    STATUS_CODE status;
-    CONTEXT_CODE context;
-    OPERATION_CODE operation;
-    DETAIL_CODE detail;
+typedef struct CATALYST_RESULT {
+    CATALYST_STATUS_CODE status;
+    CATALYST_CONTEXT_CODE context;
+    CATALYST_OPERATION_CODE operation;
+    CATALYST_DETAIL_CODE detail;
 
     #if defined(__cplusplus)
-        CONSTEXPR RESULT() : status(STATUS_CODE_SUCCESS_NONE), context(CONTEXT_CODE_NONE), operation(OPERATION_CODE_NONE), detail(DETAIL_CODE_NONE) {}
-        CONSTEXPR RESULT(STATUS_CODE status, CONTEXT_CODE context, OPERATION_CODE operation, DETAIL_CODE detail) : status(status), context(context), operation(operation), detail(detail) {}
+        CATALYST_CONSTEXPR CATALYST_RESULT() : status(CATALYST_STATUS_CODE_SUCCESS), context(0x00), operation(0x00), detail(0x00) {}
+        CATALYST_CONSTEXPR CATALYST_RESULT(CATALYST_STATUS_CODE status, CATALYST_CONTEXT_CODE context, CATALYST_OPERATION_CODE operation, CATALYST_DETAIL_CODE detail) : status(status), context(context), operation(operation), detail(detail) {}
         #if CATCRLIB_SUPPORTS_32BIT
-            explicit CONSTEXPR RESULT(UINT value) : status((STATUS_CODE) ((value >> 24) & (UINT) 0x000000FFu)), context((CONTEXT_CODE) ((value >> 16) & (UINT) 0x000000FFu)), operation((OPERATION_CODE) ((value >> 8) & (UINT) 0x000000FFu)), detail((DETAIL_CODE) (value & (UINT) 0x000000FFu)) {}
-            CONSTEXPR operator UINT() const {
-                return ((UINT) status << 24) | ((UINT) context << 16) | ((UINT) operation << 8) | (UINT) detail;
+            explicit CATALYST_CONSTEXPR CATALYST_RESULT(CATALYST_UINT value) : status((CATALYST_STATUS_CODE) ((value >> 24) & (CATALYST_UINT) 0x000000FFu)), context((CATALYST_CONTEXT_CODE) ((value >> 16) & (CATALYST_UINT) 0x000000FFu)), operation((CATALYST_OPERATION_CODE) ((value >> 8) & (CATALYST_UINT) 0x000000FFu)), detail((CATALYST_DETAIL_CODE) (value & (CATALYST_UINT) 0x000000FFu)) {}
+            CATALYST_CONSTEXPR operator CATALYST_UINT() const {
+                return ((CATALYST_UINT) status << 24) | ((CATALYST_UINT) context << 16) | ((CATALYST_UINT) operation << 8) | (CATALYST_UINT) detail;
             }
         #endif
     #endif
-} RESULT;
+} CATALYST_RESULT;
 
-#ifdef __cplusplus
-} /* namespace catalyst */
-} /* extern C */
-#endif
 #endif /* CATCRLIB_H */
