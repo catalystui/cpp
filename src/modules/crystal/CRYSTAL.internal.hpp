@@ -5,6 +5,8 @@
 
 struct CRYSTALwindow {
     CRYSTALnative native;
+    void* udata;
+    CRYSTALwindowClosingCallback closingCallback;
 };
 
-#endif
+#endif /* CRYSTAL_INTERNAL_HPP */

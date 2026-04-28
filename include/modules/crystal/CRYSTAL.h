@@ -5,9 +5,24 @@
 extern "C" {
 #endif
 
+// Export API
+#if defined(_WIN32) || defined(__CYGWIN__)
+    #if defined(CRYSTAL_EXPORTS)
+        #define CRYSTAL_API __declspec(dllexport)
+    #elif defined(CRYSTAL_USE_DLL)
+        #define CRYSTAL_API __declspec(dllimport)
+    #else
+        #define CRYSTAL_API
+    #endif
+#else
+    #define CRYSTAL_API
+#endif
+
 #define CRYSTAL_DEFAULT_WIDTH   800
 #define CRYSTAL_DEFAULT_HEIGHT  450
 #define CRYSTAL_DEFAULT_TITLE   "Crystal Window"
+
+typedef struct CRYSTALwindow CRYSTALwindow;
 
 typedef struct CRYSTALnative {
     CATALYST_NUINT primary;
@@ -15,11 +30,21 @@ typedef struct CRYSTALnative {
     CATALYST_NUINT tertiary;
 } CRYSTALnative;
 
-typedef struct CRYSTALwindow CRYSTALwindow;
+typedef CATALYST_BOOL (*CRYSTALwindowClosingCallback)(CRYSTALwindow* window, void* pointer);
 
-CRYSTALwindow* crystalCreateWindow(CATALYST_RESULT* result);
+CRYSTAL_API CRYSTALwindow* crystalCreateWindow(CATALYST_RESULT* result);
 
-void crystalDestroyWindow(CRYSTALwindow* window, CATALYST_RESULT* result);
+CRYSTAL_API void crystalPollEvents();
+
+CRYSTAL_API void crystalWaitEvents();
+
+CRYSTAL_API void crystalSetWindowUserPointer(CRYSTALwindow* window, void* pointer);
+
+CRYSTAL_API void* crystalGetWindowUserPointer(CRYSTALwindow* window);
+
+CRYSTAL_API void crystalDestroyWindow(CRYSTALwindow* window, CATALYST_RESULT* result);
+
+CRYSTAL_API void crystalSetWindowClosingCallback(CRYSTALwindow* window, CRYSTALwindowClosingCallback callback);
 
 #ifdef __cplusplus
 } /* extern C */
