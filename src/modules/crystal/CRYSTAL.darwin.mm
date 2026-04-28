@@ -33,14 +33,11 @@ extern "C" CRYSTALwindow* crystalCreateWindow(catalyst::RESULT* result) {
     @autoreleasepool {
         CRYSTALwindow* window = 0;
         catalyst::RESULT dependencyResult;
-
         catalyst::memory::alloc((void**) &window, (catalyst::NUINT) sizeof(CRYSTALwindow), &dependencyResult);
-
         if (window == 0) {
             if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_DEPENDENCY_FAILURE, 0, 1, dependencyResult.status);
             return 0;
         }
-
         window->native.primary = 0;
         window->native.secondary = 0;
         window->native.tertiary = 0;
