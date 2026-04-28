@@ -2,7 +2,8 @@
 # CATLIB #
 ##########
 target/
-test/test.cpp
+test/cli.cpp
+test/exe.cpp
 
 #####
 # C #

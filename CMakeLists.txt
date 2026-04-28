@@ -94,7 +94,7 @@ if(EXISTS "${CMAKE_SOURCE_DIR}/test")
             add_executable(${TEST_NAME}
                 "${TEST_SOURCE}"
             )
-            if(TARGET_PLATFORM_WIN32)
+            if(TARGET_PLATFORM_WIN32 AND TEST_NAME STREQUAL "exe.cpp")
                 set_target_properties(${TEST_NAME} PROPERTIES
                     WIN32_EXECUTABLE TRUE
                 )
