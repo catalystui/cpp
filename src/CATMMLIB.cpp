@@ -1,5 +1,5 @@
 #if TARGET_PLATFORM_WIN32
-    #error "CATMMLIB is not supported on Windows."
+    #include "CATMMLIB.win32.cpp"
 #elif TARGET_PLATFORM_DARWIN
     #include "CATMMLIB.darwin.cpp"
 #else
