@@ -13,8 +13,8 @@ inline window* createWindow(RESULT* result) {
     return ::crystalCreateWindow(result);
 }
 
-inline void destroyWindow(window* window) {
-    ::crystalDestroyWindow(window);
+inline void destroyWindow(window* window, RESULT* result) {
+    ::crystalDestroyWindow(window, result);
 }
 
 } /* namespace crystal */

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 4.3.0)
-project(CATLIB C CXX)
+project(CATLIB C CXX OBJC OBJCXX)
 include_directories("${CMAKE_SOURCE_DIR}/include")
 include(${CMAKE_SOURCE_DIR}/CMakeInit.cmake REQUIRED)
 metadata("CATLIB" 1 0 0 "alpha.1" "Libraries, frameworks, and official utilities based on the CatalystUI Model written in C and C++.")
@@ -44,6 +44,15 @@ add_library(CRYSTAL SHARED
 	src/modules/crystal/CRYSTAL.cpp
 )
 set_target_properties(CRYSTAL PROPERTIES PREFIX "")
+if(TARGET_PLATFORM_DARWIN)
+    target_sources(CRYSTAL PRIVATE
+        src/modules/crystal/CRYSTAL.darwin.mm
+    )
+    target_link_libraries(CRYSTAL PRIVATE
+        CATMMLIB
+        "-framework Cocoa"
+    )
+endif()
 
 # TEST
 if(EXISTS "${CMAKE_SOURCE_DIR}/test")
@@ -59,6 +68,7 @@ if(EXISTS "${CMAKE_SOURCE_DIR}/test")
             )
             target_link_libraries(${TEST_NAME}
                 CATMMLIB
+                CRYSTAL
             )
 			message(STATUS "Configured test executable ${TEST_NAME}")
         endforeach()

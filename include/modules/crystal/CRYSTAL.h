@@ -5,6 +5,10 @@
 extern "C" {
 #endif
 
+#define CRYSTAL_DEFAULT_WIDTH   800
+#define CRYSTAL_DEFAULT_HEIGHT  450
+#define CRYSTAL_DEFAULT_TITLE   "Crystal Window"
+
 typedef struct CRYSTALnative {
     CATALYST_NUINT primary;
     CATALYST_NUINT secondary;
@@ -15,7 +19,7 @@ typedef struct CRYSTALwindow CRYSTALwindow;
 
 CRYSTALwindow* crystalCreateWindow(CATALYST_RESULT* result);
 
-void crystalDestroyWindow(CRYSTALwindow* window);
+void crystalDestroyWindow(CRYSTALwindow* window, CATALYST_RESULT* result);
 
 #ifdef __cplusplus
 } /* extern C */

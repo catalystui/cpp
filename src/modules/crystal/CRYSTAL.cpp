@@ -1,2 +1,3 @@
 #include "CATCRLIB.hpp"
-#include "modules/crystal/CRYSTAL.h"
+#include "CATMMLIB.hpp"
+#include "CRYSTAL.internal.hpp"
