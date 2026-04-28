@@ -79,7 +79,7 @@ CRYSTALwindow* crystalCreateWindow(catalyst::RESULT* result) {
         NULL,
         NULL,
         hInstance,
-        NULL
+        window
     );
     if (hwnd == NULL) {
                 catalyst::memory::free(window, 0);

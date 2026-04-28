@@ -13,7 +13,7 @@
 #endif
 
 /* BYTE, SBYTE (8-bit types) */
-#if (CHAR_MAX == 0x7F && UCHAR_MAX == 0xFFU)
+#if (SCHAR_MAX == 0x7F && UCHAR_MAX == 0xFFU)
     typedef unsigned char CATALYST_BYTE;
     typedef signed char CATALYST_SBYTE;
 #else

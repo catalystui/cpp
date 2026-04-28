@@ -42,11 +42,17 @@ include_directories("${CMAKE_SOURCE_DIR}/target/generated")
 add_library(CATMMLIB SHARED
 	src/CATMMLIB.cpp
 )
+add_library(CATMMLIB_STATIC STATIC
+    src/CATMMLIB.cpp
+)
 set_target_properties(CATMMLIB PROPERTIES PREFIX "")
 
 # CRYSTAL
 add_library(CRYSTAL SHARED
 	src/modules/crystal/CRYSTAL.cpp
+)
+add_library(CRYSTAL_STATIC STATIC
+    src/modules/crystal/CRYSTAL.cpp
 )
 set_target_properties(CRYSTAL PROPERTIES PREFIX "")
 target_link_libraries(CRYSTAL PRIVATE
@@ -73,9 +79,23 @@ if(EXISTS "${CMAKE_SOURCE_DIR}/test")
             add_executable(${TEST_NAME}
                 "${TEST_SOURCE}"
             )
-            target_link_libraries(${TEST_NAME}
-                CATMMLIB
-                CRYSTAL
+            if(TARGET_PLATFORM_WIN32)
+                set_target_properties(${TEST_NAME} PROPERTIES
+                    WIN32_EXECUTABLE TRUE
+                )
+            endif()
+            if(MSVC)
+                target_link_options(${TEST_NAME} PRIVATE
+                    /ENTRY:mainCRTStartup
+                )
+            endif()
+            add_dependencies(${TEST_NAME}
+                CATMMLIB_STATIC
+                CRYSTAL_STATIC
+            )
+            target_link_libraries(${TEST_NAME} PRIVATE
+                CATMMLIB_STATIC
+                CRYSTAL_STATIC
             )
 			message(STATUS "Configured test executable ${TEST_NAME}")
         endforeach()

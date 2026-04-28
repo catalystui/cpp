@@ -7,10 +7,291 @@
     },
     "configurePresets": [
         {
+            "name": "ow",
+            "hidden": true,
+            "generator": "Watcom WMake",
+            "environment": {
+                "PATH": "$env{WATCOM}\\binnt64;$env{WATCOM}\\binnt;$penv{PATH}",
+                "INCLUDE": "$env{WATCOM}\\h;$env{WATCOM}\\h\\nt;$penv{INCLUDE}"
+            },
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Windows"
+            },
+            "cacheVariables": {
+                "CMAKE_VERBOSE_MAKEFILE": "ON",
+                "CMAKE_C_STANDARD": "90",
+                "CMAKE_C_STANDARD_REQUIRED": "ON",
+                "CMAKE_C_EXTENSIONS": "OFF",
+                "CMAKE_C_FLAGS_INIT": "-za",
+                "CMAKE_CXX_STANDARD": "98",
+                "CMAKE_CXX_STANDARD_REQUIRED": "ON",
+                "CMAKE_CXX_EXTENSIONS": "OFF",
+                "CMAKE_CXX_FLAGS_INIT": "-za",
+                "TARGET_VENDOR": "microsoft"
+            }
+        },
+        {
+            "name": "ow-i86",
+            "hidden": true,
+            "inherits": "ow",
+            "cacheVariables": {
+                "CMAKE_MAKE_PROGRAM": "$env{WATCOM}\\binnt64\\wmake.exe",
+                "CMAKE_C_COMPILER": "$env{WATCOM}\\binnt64\\wcl.exe",
+                "CMAKE_CXX_COMPILER": "$env{WATCOM}\\binnt64\\wcl.exe",
+                "CMAKE_SYSTEM_PROCESSOR": "I86",
+                "CMAKE_WATCOM_RUNTIME_LIBRARY": "SingleThreaded"
+            }
+        },
+        {
+            "name": "ow-i386",
+            "hidden": true,
+            "inherits": "ow",
+            "cacheVariables": {
+                "CMAKE_MAKE_PROGRAM": "$env{WATCOM}\\binnt64\\wmake.exe",
+                "CMAKE_C_COMPILER": "$env{WATCOM}\\binnt64\\wcl386.exe",
+                "CMAKE_CXX_COMPILER": "$env{WATCOM}\\binnt64\\wcl386.exe",
+                "CMAKE_SYSTEM_PROCESSOR": "X86",
+                "CMAKE_WATCOM_RUNTIME_LIBRARY": "MultiThreaded"
+            }
+        },
+        {
+            "name": "ow-i86-dos16",
+            "displayName": "DOS 16-bit (I86)",
+            "description": "Configure Open Watcom (v2) for DOS 16-bit (I86)",
+            "inherits": "ow-i86",
+            "binaryDir": "${sourceDir}/target/ow-i86-dos16",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_SYSTEM_NAME": "DOS",
+                "TARGET_SYSTEM": "dos16"
+            }
+        },
+        {
+            "name": "ow-i386-dos32",
+            "displayName": "DOS 32-bit (I386)",
+            "description": "Configure Open Watcom (v2) for DOS 32-bit (I386)",
+            "inherits": "ow-i386",
+            "binaryDir": "${sourceDir}/target/ow-i386-dos32",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_SYSTEM_NAME": "DOS",
+                "TARGET_SYSTEM": "dos32"
+            }
+        },
+        {
+            "name": "ow-i386-win95",
+            "displayName": "Windows 95 (I386)",
+            "description": "Configure Open Watcom (v2) for Windows 95 (I386)",
+            "inherits": "ow-i386",
+            "binaryDir": "${sourceDir}/target/ow-i386-win95",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_SYSTEM_NAME": "Windows",
+                "TARGET_SYSTEM": "win95"
+            }
+        },
+        {
+            "name": "ow-i386-win98",
+            "displayName": "Windows 98 (I386)",
+            "description": "Configure Open Watcom (v2) for Windows 98 (I386)",
+            "inherits": "ow-i386",
+            "binaryDir": "${sourceDir}/target/ow-i386-win98",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "TARGET_SYSTEM": "win98"
+            }
+        },
+        {
+            "name": "ow-i386-nt5.0",
+            "displayName": "Windows NT 5.0 (I386)",
+            "description": "Configure Open Watcom (v2) for Windows NT 5.0 (I386)",
+            "inherits": "ow-i386",
+            "binaryDir": "${sourceDir}/target/ow-i386-nt5.0",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_SYSTEM_NAME": "Windows",
+                "TARGET_SYSTEM": "nt5.0"
+            }
+        },
+        {
+            "name": "msvc141",
+            "hidden": true,
+            "generator": "Visual Studio 17 2022",
+            "toolset": "v141_xp",
+            "environment": {
+                "WindowsSDKVersion": "10.0.19041.0"
+            },
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Windows"
+            },
+            "cacheVariables": {
+                "CMAKE_VERBOSE_MAKEFILE": "ON",
+                "CMAKE_C_STANDARD": "90",
+                "CMAKE_C_STANDARD_REQUIRED": "ON",
+                "CMAKE_C_EXTENSIONS": "OFF",
+                "CMAKE_C_FLAGS_INIT": "/Zc:__STDC__",
+                "CMAKE_CXX_STANDARD": "14",
+                "CMAKE_CXX_STANDARD_REQUIRED": "ON",
+                "CMAKE_CXX_EXTENSIONS": "OFF",
+                "CMAKE_CXX_FLAGS_INIT": "/Zc:__cplusplus /Zc:__STDC__ /std:c++14",
+                "CMAKE_SYSTEM_NAME": "Windows",
+                "CMAKE_SYSTEM_VERSION": "10.0.19041.0",
+                "CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION": "10.0.19041.0",
+                "TARGET_VENDOR": "microsoft"
+            }
+        },
+        {
+            "name": "msvc141-nt5.1,5.2",
+            "hidden": true,
+            "inherits": "msvc141"
+        },
+        {
+            "name": "msvc141-nt5.1-x86",
+            "displayName": "Windows NT 5.1 (x86)",
+            "description": "Configure MSVC (v14.1 XP) for Windows NT 5.1 (x86)",
+            "inherits": "msvc141-nt5.1,5.2",
+            "binaryDir": "${sourceDir}/out/build/msvc141-nt5.1-x86",
+            "architecture": "Win32",
+            "cacheVariables": {
+                "TARGET_SYSTEM": "nt5.1"
+            }
+        },
+        {
+            "name": "msvc141-nt5.2-x64",
+            "displayName": "Windows NT 5.2 (x64)",
+            "description": "Configure MSVC (v14.1 XP) for Windows NT 5.2 (x64)",
+            "inherits": "msvc141-nt5.1,5.2",
+            "binaryDir": "${sourceDir}/out/build/msvc141-nt5.2-x64",
+            "architecture": "x64",
+            "cacheVariables": {
+                "TARGET_SYSTEM": "nt5.2"
+            }
+        },
+        {
+            "name": "msvc143",
+            "hidden": true,
+            "generator": "Visual Studio 17 2022",
+            "toolset": "v143",
+            "environment": {
+                "WindowsSDKVersion": "10.0.19041.0"
+            },
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Windows"
+            },
+            "cacheVariables": {
+                "CMAKE_VERBOSE_MAKEFILE": "ON",
+                "CMAKE_C_STANDARD": "17",
+                "CMAKE_C_STANDARD_REQUIRED": "ON",
+                "CMAKE_C_EXTENSIONS": "OFF",
+                "CMAKE_C_FLAGS_INIT": "/Zc:__STDC__ /std:c17",
+                "CMAKE_CXX_STANDARD": "23",
+                "CMAKE_CXX_STANDARD_REQUIRED": "ON",
+                "CMAKE_CXX_EXTENSIONS": "OFF",
+                "CMAKE_CXX_FLAGS_INIT": "/Zc:__cplusplus /Zc:__STDC__ /std:c++23",
+                "CMAKE_SYSTEM_NAME": "Windows",
+                "CMAKE_SYSTEM_VERSION": "10.0.19041.0",
+                "CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION": "10.0.19041.0",
+                "TARGET_VENDOR": "microsoft"
+            }
+        },
+        {
+            "name": "msvc143-nt6.0",
+            "hidden": true,
+            "inherits": "msvc143",
+            "cacheVariables": {
+                "TARGET_SYSTEM": "nt6.0"
+            }
+        },
+        {
+            "name": "msvc143-nt6.2",
+            "hidden": true,
+            "inherits": "msvc143",
+            "cacheVariables": {
+                "TARGET_SYSTEM": "nt6.2"
+            }
+        },
+        {
+            "name": "msvc143-nt6.0-x86",
+            "displayName": "Windows NT 6.0 (x86)",
+            "description": "Configure MSVC (v14.3) for Windows NT 6.0 (x86)",
+            "inherits": "msvc143-nt6.0",
+            "binaryDir": "${sourceDir}/out/build/msvc143-nt6.0-x86",
+            "architecture": "Win32",
+            "cacheVariables": {
+                "TARGET_ARCHITECTURE": "x86"
+            }
+        },
+        {
+            "name": "msvc143-nt6.0-x64",
+            "displayName": "Windows NT 6.0 (x64)",
+            "description": "Configure MSVC (v14.3) for Windows NT 6.0 (x64)",
+            "inherits": "msvc143-nt6.0",
+            "binaryDir": "${sourceDir}/out/build/msvc143-nt6.0-x64",
+            "architecture": "x64",
+            "cacheVariables": {
+                "TARGET_ARCHITECTURE": "x64"
+            }
+        },
+        {
+            "name": "msvc143-nt6.2-x86",
+            "displayName": "Windows NT 6.2 (x86)",
+            "description": "Configure MSVC (v14.3) for Windows NT 6.2 (x86)",
+            "inherits": "msvc143-nt6.2",
+            "binaryDir": "${sourceDir}/out/build/msvc143-nt6.2-x86",
+            "architecture": "Win32",
+            "cacheVariables": {
+                "TARGET_ARCHITECTURE": "x86"
+            }
+        },
+        {
+            "name": "msvc143-nt6.2-x64",
+            "displayName": "Windows NT 6.2 (x64)",
+            "description": "Configure MSVC (v14.3) for Windows NT 6.2 (x64)",
+            "inherits": "msvc143-nt6.2",
+            "binaryDir": "${sourceDir}/out/build/msvc143-nt6.2-x64",
+            "architecture": "x64",
+            "cacheVariables": {
+                "TARGET_ARCHITECTURE": "x64"
+            }
+        },
+        {
+            "name": "msvc143-nt6.2-armv7",
+            "displayName": "Windows NT 6.2 (ARMv7)",
+            "description": "Configure MSVC (v14.3) for Windows NT 6.2 (ARMv7)",
+            "inherits": "msvc143-nt6.2",
+            "binaryDir": "${sourceDir}/out/build/msvc143-nt6.2-armv7",
+            "architecture": "ARM",
+            "cacheVariables": {
+                "TARGET_ARCHITECTURE": "armv7"
+            }
+        },
+        {
+            "name": "msvc143-nt6.2-arm64",
+            "displayName": "Windows NT 6.2 (ARM64)",
+            "description": "Configure MSVC (v14.3) for Windows NT 6.2 (ARM64)",
+            "inherits": "msvc143-nt6.2",
+            "binaryDir": "${sourceDir}/out/build/msvc143-nt6.2-arm64",
+            "architecture": "ARM64",
+            "cacheVariables": {
+                "TARGET_ARCHITECTURE": "arm64"
+            }
+        },
+        {
             "name": "msvc145",
             "hidden": true,
             "generator": "Visual Studio 18 2026",
             "toolset": "v145",
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Windows"
+            },
             "cacheVariables": {
                 "CMAKE_VERBOSE_MAKEFILE": "ON",
                 "CMAKE_C_STANDARD": "23",
@@ -57,6 +338,11 @@
             "name": "aclang17",
             "hidden": true,
             "generator": "Xcode",
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Darwin"
+            },
             "cacheVariables": {
                 "CMAKE_VERBOSE_MAKEFILE": "ON",
                 "CMAKE_C_STANDARD": "23",
@@ -105,11 +391,158 @@
     ],
     "buildPresets": [
         {
-            "name": "msvc145-nt10.0-x64-debug",
+            "name": "ow-i86-dos16",
+            "configurePreset": "ow-i86-dos16",
+            "displayName": "DOS 16-bit (I86)",
+            "description": "Build with Open Watcom (v2) for DOS 16-bit (I86)"
+        },
+        {
+            "name": "ow-i386-dos32",
+            "configurePreset": "ow-i386-dos32",
+            "displayName": "DOS 32-bit (I386)",
+            "description": "Build with Open Watcom (v2) for DOS 32-bit (I386)"
+        },
+        {
+            "name": "ow-i386-win95",
+            "configurePreset": "ow-i386-win95",
+            "displayName": "Windows 95 (I386)",
+            "description": "Build with Open Watcom (v2) for Windows 95 (I386)"
+        },
+        {
+            "name": "ow-i386-win98",
+            "configurePreset": "ow-i386-win98",
+            "displayName": "Windows 98 (I386)",
+            "description": "Build with Open Watcom (v2) for Windows 98 (I386)"
+        },
+        {
+            "name": "ow-i386-nt5.0",
+            "configurePreset": "ow-i386-nt5.0",
+            "displayName": "Windows NT 5.0 (I386)",
+            "description": "Build with Open Watcom (v2) for Windows NT 5.0 (I386)"
+        },
+        {
+            "name": "msvc141-nt5.1-x86-release",
+            "configuration": "Release",
+            "configurePreset": "msvc141-nt5.1-x86",
+            "displayName": "Release",
+            "description": "Build with MSVC (v14.1 XP) for Windows NT 5.1 (x86)",
+            "nativeToolOptions": [
+                "/p:XPDeprecationWarning=False"
+            ]
+        },
+        {
+            "name": "msvc141-nt5.1-x86-debug",
             "configuration": "Debug",
-            "configurePreset": "msvc145-nt10.0-x64",
+            "configurePreset": "msvc141-nt5.1-x86",
             "displayName": "Debug",
-            "description": "Build with MSVC (v14.4) for Windows NT 10.0 (x64)"
+            "description": "Build with MSVC (v14.1 XP) for Windows NT 5.1 (x86)",
+            "nativeToolOptions": [
+                "/p:XPDeprecationWarning=False"
+            ]
+        },
+        {
+            "name": "msvc141-nt5.2-x64-release",
+            "configuration": "Release",
+            "configurePreset": "msvc141-nt5.2-x64",
+            "displayName": "Release",
+            "description": "Build with MSVC (v14.1 XP) for Windows NT 5.2 (x64)",
+            "nativeToolOptions": [
+                "/p:XPDeprecationWarning=False"
+            ]
+        },
+        {
+            "name": "msvc141-nt5.2-x64-debug",
+            "configuration": "Debug",
+            "configurePreset": "msvc141-nt5.2-x64",
+            "displayName": "Debug",
+            "description": "Build with MSVC (v14.1 XP) for Windows NT 5.2 (x64)",
+            "nativeToolOptions": [
+                "/p:XPDeprecationWarning=False"
+            ]
+        },
+        {
+            "name": "msvc143-nt6.0-x86-release",
+            "configuration": "Release",
+            "configurePreset": "msvc143-nt6.0-x86",
+            "displayName": "Release",
+            "description": "Build with MSVC (v14.3) for Windows NT 6.0 (x86)"
+        },
+        {
+            "name": "msvc143-nt6.0-x86-debug",
+            "configuration": "Debug",
+            "configurePreset": "msvc143-nt6.0-x86",
+            "displayName": "Debug",
+            "description": "Build with MSVC (v14.3) for Windows NT 6.0 (x86)"
+        },
+        {
+            "name": "msvc143-nt6.0-x64-release",
+            "configuration": "Release",
+            "configurePreset": "msvc143-nt6.0-x64",
+            "displayName": "Release",
+            "description": "Build with MSVC (v14.3) for Windows NT 6.0 (x64)"
+        },
+        {
+            "name": "msvc143-nt6.0-x64-debug",
+            "configuration": "Debug",
+            "configurePreset": "msvc143-nt6.0-x64",
+            "displayName": "Debug",
+            "description": "Build with MSVC (v14.3) for Windows NT 6.0 (x64)"
+        },
+        {
+            "name": "msvc143-nt6.2-x86-release",
+            "configuration": "Release",
+            "configurePreset": "msvc143-nt6.2-x86",
+            "displayName": "Release",
+            "description": "Build with MSVC (v14.3) for Windows NT 6.2 (x86)"
+        },
+        {
+            "name": "msvc143-nt6.2-x86-debug",
+            "configuration": "Debug",
+            "configurePreset": "msvc143-nt6.2-x86",
+            "displayName": "Debug",
+            "description": "Build with MSVC (v14.3) for Windows NT 6.2 (x86)"
+        },
+        {
+            "name": "msvc143-nt6.2-x64-release",
+            "configuration": "Release",
+            "configurePreset": "msvc143-nt6.2-x64",
+            "displayName": "Release",
+            "description": "Build with MSVC (v14.3) for Windows NT 6.2 (x64)"
+        },
+        {
+            "name": "msvc143-nt6.2-x64-debug",
+            "configuration": "Debug",
+            "configurePreset": "msvc143-nt6.2-x64",
+            "displayName": "Debug",
+            "description": "Build with MSVC (v14.3) for Windows NT 6.2 (x64)"
+        },
+        {
+            "name": "msvc143-nt6.2-armv7-release",
+            "configuration": "Release",
+            "configurePreset": "msvc143-nt6.2-armv7",
+            "displayName": "Release",
+            "description": "Build with MSVC (v14.3) for Windows NT 6.2 (ARMv7)"
+        },
+        {
+            "name": "msvc143-nt6.2-armv7-debug",
+            "configuration": "Debug",
+            "configurePreset": "msvc143-nt6.2-armv7",
+            "displayName": "Debug",
+            "description": "Build with MSVC (v14.3) for Windows NT 6.2 (ARMv7)"
+        },
+        {
+            "name": "msvc143-nt6.2-arm64-release",
+            "configuration": "Release",
+            "configurePreset": "msvc143-nt6.2-arm64",
+            "displayName": "Release",
+            "description": "Build with MSVC (v14.3) for Windows NT 6.2 (ARM64)"
+        },
+        {
+            "name": "msvc143-nt6.2-arm64-debug",
+            "configuration": "Debug",
+            "configurePreset": "msvc143-nt6.2-arm64",
+            "displayName": "Debug",
+            "description": "Build with MSVC (v14.3) for Windows NT 6.2 (ARM64)"
         },
         {
             "name": "msvc145-nt10.0-x64-release",
@@ -119,17 +552,24 @@
             "description": "Build with MSVC (v14.4) for Windows NT 10.0 (x64)"
         },
         {
-            "name": "msvc145-nt10.0-arm64-debug",
+            "name": "msvc145-nt10.0-x64-debug",
             "configuration": "Debug",
-            "configurePreset": "msvc145-nt10.0-arm64",
+            "configurePreset": "msvc145-nt10.0-x64",
             "displayName": "Debug",
-            "description": "Build with MSVC (v14.4) for Windows NT 10.0 (ARM64)"
+            "description": "Build with MSVC (v14.4) for Windows NT 10.0 (x64)"
         },
         {
             "name": "msvc145-nt10.0-arm64-release",
             "configuration": "Release",
             "configurePreset": "msvc145-nt10.0-arm64",
             "displayName": "Release",
+            "description": "Build with MSVC (v14.4) for Windows NT 10.0 (ARM64)"
+        },
+        {
+            "name": "msvc145-nt10.0-arm64-debug",
+            "configuration": "Debug",
+            "configurePreset": "msvc145-nt10.0-arm64",
+            "displayName": "Debug",
             "description": "Build with MSVC (v14.4) for Windows NT 10.0 (ARM64)"
         },
         {
