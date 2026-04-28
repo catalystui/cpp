@@ -1,8 +1,2 @@
-#include "CRYSTAL.h"
-
-using namespace catalyst;
-using namespace catalyst::modules::crystal;
-
-struct CRYSTALwindow {
-    CRYSTALnative native_handle;
-};
+#include "CATCRLIB.hpp"
+#include "modules/crystal/CRYSTAL.h"
