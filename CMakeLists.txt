@@ -65,6 +65,12 @@ if(TARGET_PLATFORM_DARWIN)
     target_link_libraries(CRYSTAL PRIVATE
         "-framework Cocoa"
     )
+    target_sources(CRYSTAL_STATIC PRIVATE
+        src/modules/crystal/CRYSTAL.darwin.mm
+    )
+    target_link_libraries(CRYSTAL_STATIC PRIVATE
+        "-framework Cocoa"
+    )
 endif()
 
 # TEST
