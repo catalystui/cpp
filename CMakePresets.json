@@ -154,7 +154,7 @@
             "displayName": "Windows NT 5.1 (x86)",
             "description": "Configure MSVC (v14.1 XP) for Windows NT 5.1 (x86)",
             "inherits": "msvc141-nt5.1,5.2",
-            "binaryDir": "${sourceDir}/out/build/msvc141-nt5.1-x86",
+            "binaryDir": "${sourceDir}/target/msvc141-nt5.1-x86",
             "architecture": "Win32",
             "cacheVariables": {
                 "TARGET_SYSTEM": "nt5.1"
@@ -165,7 +165,7 @@
             "displayName": "Windows NT 5.2 (x64)",
             "description": "Configure MSVC (v14.1 XP) for Windows NT 5.2 (x64)",
             "inherits": "msvc141-nt5.1,5.2",
-            "binaryDir": "${sourceDir}/out/build/msvc141-nt5.2-x64",
+            "binaryDir": "${sourceDir}/target/msvc141-nt5.2-x64",
             "architecture": "x64",
             "cacheVariables": {
                 "TARGET_SYSTEM": "nt5.2"
@@ -221,7 +221,7 @@
             "displayName": "Windows NT 6.0 (x86)",
             "description": "Configure MSVC (v14.3) for Windows NT 6.0 (x86)",
             "inherits": "msvc143-nt6.0",
-            "binaryDir": "${sourceDir}/out/build/msvc143-nt6.0-x86",
+            "binaryDir": "${sourceDir}/target/msvc143-nt6.0-x86",
             "architecture": "Win32",
             "cacheVariables": {
                 "TARGET_ARCHITECTURE": "x86"
@@ -232,7 +232,7 @@
             "displayName": "Windows NT 6.0 (x64)",
             "description": "Configure MSVC (v14.3) for Windows NT 6.0 (x64)",
             "inherits": "msvc143-nt6.0",
-            "binaryDir": "${sourceDir}/out/build/msvc143-nt6.0-x64",
+            "binaryDir": "${sourceDir}/target/msvc143-nt6.0-x64",
             "architecture": "x64",
             "cacheVariables": {
                 "TARGET_ARCHITECTURE": "x64"
@@ -243,7 +243,7 @@
             "displayName": "Windows NT 6.2 (x86)",
             "description": "Configure MSVC (v14.3) for Windows NT 6.2 (x86)",
             "inherits": "msvc143-nt6.2",
-            "binaryDir": "${sourceDir}/out/build/msvc143-nt6.2-x86",
+            "binaryDir": "${sourceDir}/target/msvc143-nt6.2-x86",
             "architecture": "Win32",
             "cacheVariables": {
                 "TARGET_ARCHITECTURE": "x86"
@@ -254,7 +254,7 @@
             "displayName": "Windows NT 6.2 (x64)",
             "description": "Configure MSVC (v14.3) for Windows NT 6.2 (x64)",
             "inherits": "msvc143-nt6.2",
-            "binaryDir": "${sourceDir}/out/build/msvc143-nt6.2-x64",
+            "binaryDir": "${sourceDir}/target/msvc143-nt6.2-x64",
             "architecture": "x64",
             "cacheVariables": {
                 "TARGET_ARCHITECTURE": "x64"
@@ -265,7 +265,7 @@
             "displayName": "Windows NT 6.2 (ARMv7)",
             "description": "Configure MSVC (v14.3) for Windows NT 6.2 (ARMv7)",
             "inherits": "msvc143-nt6.2",
-            "binaryDir": "${sourceDir}/out/build/msvc143-nt6.2-armv7",
+            "binaryDir": "${sourceDir}/target/msvc143-nt6.2-armv7",
             "architecture": "ARM",
             "cacheVariables": {
                 "TARGET_ARCHITECTURE": "armv7"
@@ -276,7 +276,7 @@
             "displayName": "Windows NT 6.2 (ARM64)",
             "description": "Configure MSVC (v14.3) for Windows NT 6.2 (ARM64)",
             "inherits": "msvc143-nt6.2",
-            "binaryDir": "${sourceDir}/out/build/msvc143-nt6.2-arm64",
+            "binaryDir": "${sourceDir}/target/msvc143-nt6.2-arm64",
             "architecture": "ARM64",
             "cacheVariables": {
                 "TARGET_ARCHITECTURE": "arm64"
