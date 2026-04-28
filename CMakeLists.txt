@@ -47,6 +47,15 @@ add_library(CATMMLIB_STATIC STATIC
 )
 set_target_properties(CATMMLIB PROPERTIES PREFIX "")
 
+# CATTELIB
+add_library(CATTELIB SHARED
+    src/CATTELIB.cpp
+)
+add_library(CATTELIB_STATIC STATIC
+    src/CATTELIB.cpp
+)
+set_target_properties(CATTELIB PROPERTIES PREFIX "")
+
 # CRYSTAL
 add_library(CRYSTAL SHARED
 	src/modules/crystal/CRYSTAL.cpp
@@ -97,10 +106,12 @@ if(EXISTS "${CMAKE_SOURCE_DIR}/test")
             endif()
             add_dependencies(${TEST_NAME}
                 CATMMLIB_STATIC
+                CATTELIB_STATIC
                 CRYSTAL_STATIC
             )
             target_link_libraries(${TEST_NAME} PRIVATE
                 CATMMLIB_STATIC
+                CATTELIB_STATIC
                 CRYSTAL_STATIC
             )
 			message(STATUS "Configured test executable ${TEST_NAME}")
