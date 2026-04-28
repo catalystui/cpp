@@ -2,6 +2,9 @@
 #include "CATMMLIB.hpp"
 #include "CRYSTAL.internal.hpp"
 
+#define CRYSTAL_WIN32_WIDEN2(x) L##x
+#define CRYSTAL_WIN32_WIDEN(x) CRYSTAL_WIN32_WIDEN2(x)
+
 #ifndef WIN32_LEAN_AND_MEAN
     #define WIN32_LEAN_AND_MEAN
 #endif
@@ -9,6 +12,14 @@
     #define NOMINMAX
 #endif
 #include <windows.h>
+
+#ifdef UNICODE
+#define CRYSTAL_WIN32_CLASS_NAME    L"CRYSTALWindowClass"
+#define CRYSTAL_WIN32_DEFAULT_TITLE CRYSTAL_WIN32_WIDEN(CRYSTAL_DEFAULT_TITLE)
+#else
+#define CRYSTAL_WIN32_CLASS_NAME    "CRYSTALWindowClass"
+#define CRYSTAL_WIN32_DEFAULT_TITLE CRYSTAL_DEFAULT_TITLE
+#endif
 
 static LRESULT CALLBACK crystalWin32WindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
     if (message == WM_NCCREATE) {
@@ -60,7 +71,7 @@ CRYSTALwindow* crystalCreateWindow(catalyst::RESULT* result) {
     WNDCLASS wc = { 0 };
     wc.lpfnWndProc = crystalWin32WindowProc;
     wc.hInstance = hInstance;
-    wc.lpszClassName = "CRYSTALWindowClass";
+    wc.lpszClassName = CRYSTAL_WIN32_CLASS_NAME;
     wc.hCursor = LoadCursor(NULL, IDC_ARROW);
     wc.hbrBackground = (HBRUSH) (COLOR_WINDOW + 1);
     if (RegisterClass(&wc) == 0) {
@@ -71,8 +82,8 @@ CRYSTALwindow* crystalCreateWindow(catalyst::RESULT* result) {
 
     HWND hwnd = CreateWindowEx(
         0,
-        "CRYSTALWindowClass",
-        CRYSTAL_DEFAULT_TITLE,
+        CRYSTAL_WIN32_CLASS_NAME,
+        CRYSTAL_WIN32_DEFAULT_TITLE,
         WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT, CW_USEDEFAULT,
         CRYSTAL_DEFAULT_WIDTH, CRYSTAL_DEFAULT_HEIGHT,
@@ -90,6 +101,7 @@ CRYSTALwindow* crystalCreateWindow(catalyst::RESULT* result) {
     window->native.secondary = (catalyst::NUINT) hInstance;
     window->native.tertiary = 0;
 
+    SetWindowText(hwnd, CRYSTAL_WIN32_DEFAULT_TITLE);
     ShowWindow(hwnd, SW_NORMAL);
     UpdateWindow(hwnd);
 
@@ -99,7 +111,7 @@ CRYSTALwindow* crystalCreateWindow(catalyst::RESULT* result) {
 
 static void crystalWin32ProcessEvents(catalyst::BOOL wait) {
     MSG message;
-    if (wait && !PeekMessage(&message, 0, 0, 0, PM_REMOVE)) {
+    if (wait && !PeekMessage(&message, 0, 0, 0, PM_NOREMOVE)) {
         WaitMessage();
     }
     while (PeekMessage(&message, 0, 0, 0, PM_REMOVE)) {
