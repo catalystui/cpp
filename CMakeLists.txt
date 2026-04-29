@@ -6,12 +6,15 @@ metadata("CATLIB" 1 0 0 "alpha.1" "Libraries, frameworks, and official utilities
 configure("${TARGET_VENDOR}" "${TARGET_SYSTEM}" "${TARGET_ARCHITECTURE}")
 define()
 
-# Enable Objective-C, Objective-C++ if applicable
+# DARWIN platform specifics
 if(TARGET_PLATFORM_DARWIN)
     enable_language(OBJC OBJCXX)
+    find_library(MACH_LIBRARY mach)
 endif()
 
-# Identify __STDC_VERSION__
+#############################
+# Identify __STDC_VERSION__ #
+#############################
 if (CMAKE_C_STANDARD STREQUAL "95")
 	set(CMAKECFG_STDC_VERSION 199409L)
 elseif (CMAKE_C_STANDARD STREQUAL "99")
@@ -26,11 +29,17 @@ else()
 	set(CMAKECFG_STDC_VERSION 0)
 endif()
 
-# Check type sizes
+
+####################
+# Check type sizes #
+####################
 include(CheckTypeSize)
 check_type_size("void*" CMAKECFG_SIZEOF_VOID_P)
 
-# Generate CMAKE header file
+
+###################################
+# Generate CMAKECFG.h header file #
+###################################
 configure_file(
 	"${CMAKE_SOURCE_DIR}/CMakeConfig.h"
 	"${CMAKE_SOURCE_DIR}/target/generated/CMAKECFG.h"
@@ -38,47 +47,48 @@ configure_file(
 )
 include_directories("${CMAKE_SOURCE_DIR}/target/generated")
 
+#######################
+# Configure libraries #
+#######################
 # CATMMLIB
-add_library(CATMMLIB SHARED
-	src/CATMMLIB.cpp
+add_library(CATMMLIB_SHARED SHARED)
+add_library(CATMMLIB_STATIC STATIC)
+configure_target(
+    NAME CATMMLIB
+    TARGETS CATMMLIB_SHARED CATMMLIB_STATIC
+    SOURCES
+        src/CATMMLIB.cpp
 )
-add_library(CATMMLIB_STATIC STATIC
-    src/CATMMLIB.cpp
-)
-set_target_properties(CATMMLIB PROPERTIES PREFIX "")
 
 # CATTELIB
-add_library(CATTELIB SHARED
-    src/CATTELIB.cpp
+add_library(CATTELIB_SHARED SHARED)
+add_library(CATTELIB_STATIC STATIC)
+configure_target(
+    NAME CATTELIB
+    TARGETS CATTELIB_SHARED CATTELIB_STATIC
+    SOURCES
+        src/CATTELIB.cpp
 )
-add_library(CATTELIB_STATIC STATIC
-    src/CATTELIB.cpp
-)
-set_target_properties(CATTELIB PROPERTIES PREFIX "")
 
 # CRYSTAL
-add_library(CRYSTAL SHARED
-	src/modules/crystal/CRYSTAL.cpp
-)
-add_library(CRYSTAL_STATIC STATIC
-    src/modules/crystal/CRYSTAL.cpp
-)
-set_target_properties(CRYSTAL PROPERTIES PREFIX "")
-target_link_libraries(CRYSTAL PRIVATE
-    CATMMLIB
+add_library(CRYSTAL_SHARED SHARED)
+add_library(CRYSTAL_STATIC STATIC)
+configure_target(
+    NAME CRYSTAL
+    TARGETS CRYSTAL_SHARED CRYSTAL_STATIC
+    SOURCES
+        src/modules/crystal/CRYSTAL.cpp
+    DEPENDS
+        CATMMLIB_SHARED
+        CATTELIB_SHARED
 )
 if(TARGET_PLATFORM_DARWIN)
-    target_sources(CRYSTAL PRIVATE
-        src/modules/crystal/CRYSTAL.darwin.mm
-    )
-    target_link_libraries(CRYSTAL PRIVATE
-        "-framework Cocoa"
-    )
-    target_sources(CRYSTAL_STATIC PRIVATE
-        src/modules/crystal/CRYSTAL.darwin.mm
-    )
-    target_link_libraries(CRYSTAL_STATIC PRIVATE
-        "-framework Cocoa"
+    configure_target(
+        TARGETS CRYSTAL_SHARED CRYSTAL_STATIC
+        SOURCES
+            src/modules/crystal/CRYSTAL.darwin.mm
+        DEPENDS
+            "-framework Cocoa"
     )
 endif()
 
@@ -94,7 +104,7 @@ if(EXISTS "${CMAKE_SOURCE_DIR}/test")
             add_executable(${TEST_NAME}
                 "${TEST_SOURCE}"
             )
-            if(TARGET_PLATFORM_WIN32 AND TEST_NAME STREQUAL "exe.cpp")
+            if(TARGET_PLATFORM_WIN32 AND TEST_NAME STREQUAL "exe")
                 set_target_properties(${TEST_NAME} PROPERTIES
                     WIN32_EXECUTABLE TRUE
                 )
@@ -104,17 +114,14 @@ if(EXISTS "${CMAKE_SOURCE_DIR}/test")
                     /ENTRY:mainCRTStartup
                 )
             endif()
-            add_dependencies(${TEST_NAME}
-                CATMMLIB_STATIC
-                CATTELIB_STATIC
-                CRYSTAL_STATIC
+            configure_target(
+                NAME ${TEST_NAME}
+                TARGETS ${TEST_NAME}
+                DEPENDS
+                    CATMMLIB_STATIC
+                    CATTELIB_STATIC
+                    CRYSTAL_STATIC
             )
-            target_link_libraries(${TEST_NAME} PRIVATE
-                CATMMLIB_STATIC
-                CATTELIB_STATIC
-                CRYSTAL_STATIC
-            )
-			message(STATUS "Configured test executable ${TEST_NAME}")
         endforeach()
     else()
         message(STATUS "No .cpp test source files found, skipping test executable configuration")

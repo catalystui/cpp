@@ -42,16 +42,51 @@ function(configure target_vendor target_system target_architecture)
         set(OUTPUT_DIRECTORY "${OUTPUT_DIRECTORY}/${target_architecture}")
     endif()
     message(STATUS "Setting output directory: ${OUTPUT_DIRECTORY}")
+    file(REMOVE_RECURSE "${OUTPUT_DIRECTORY}")
+    file(MAKE_DIRECTORY "${OUTPUT_DIRECTORY}")
     if(CMAKE_CONFIGURATION_TYPES)
+        foreach(CONFIG_NAME ${CMAKE_CONFIGURATION_TYPES})
+            string(TOLOWER "${CONFIG_NAME}" CONFIG_LOWER)
+            if (CONFIG_LOWER STREQUAL "debug" OR CONFIG_LOWER STREQUAL "release")
+                file(MAKE_DIRECTORY "${OUTPUT_DIRECTORY}/${CONFIG_LOWER}")
+            endif()
+        endforeach()
         set(OUTPUT_DIRECTORY "${OUTPUT_DIRECTORY}/$<LOWER_CASE:$<CONFIG>>")
     endif()
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIRECTORY}" PARENT_SCOPE)
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${OUTPUT_DIRECTORY}" PARENT_SCOPE)
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${OUTPUT_DIRECTORY}" PARENT_SCOPE)
 
-    add_custom_target(target_clean COMMAND ${CMAKE_COMMAND} -E rm -rf ${OUTPUT_DIRECTORY}/*)
-    message(STATUS "Added custom target 'target_clean'")
+    set(CMAKE_SHARED_LIBRARY_PREFIX "" PARENT_SCOPE)
+    set(CMAKE_STATIC_LIBRARY_PREFIX "" PARENT_SCOPE)
+    message(STATUS "Stripped library prefixes for shared and static libraries")
 endfunction()
+
+function(configure_target)
+    cmake_parse_arguments(ARG "" "NAME" "TARGETS;SOURCES;DEPENDS" ${ARGN})
+
+    foreach(TARGET_NAME ${ARG_TARGETS})
+        if(NOT "${ARG_NAME}" STREQUAL "")
+            set_target_properties(${TARGET_NAME} PROPERTIES
+                OUTPUT_NAME "${ARG_NAME}"
+            )
+        endif()
+
+        if(ARG_SOURCES)
+            target_sources(${TARGET_NAME} PRIVATE ${ARG_SOURCES})
+        endif()
+
+        if(ARG_DEPENDS)
+            target_link_libraries(${TARGET_NAME} PRIVATE ${ARG_DEPENDS})
+        endif()
+    endforeach()
+    if(NOT "${ARG_NAME}" STREQUAL "")
+        message(STATUS "Configured target(s) ${ARG_TARGETS} with output name '${ARG_NAME}', sources: ${ARG_SOURCES}, dependencies: ${ARG_DEPENDS}")
+    else()
+        message(STATUS "Configured target(s) ${ARG_TARGETS} with sources: ${ARG_SOURCES}, dependencies: ${ARG_DEPENDS}")
+    endif()
+endfunction()
+
 
 function(define)
     add_compile_definitions(
