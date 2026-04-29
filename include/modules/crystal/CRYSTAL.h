@@ -35,6 +35,8 @@ typedef CATALYST_BOOL (*CRYSTALwindowClosingCallback) (CRYSTALwindow* window);
 CRYSTAL_API CRYSTALwindow* crystalCreateWindow(CATALYST_RESULT* result);
 CRYSTAL_API void crystalPollEvents();
 CRYSTAL_API void crystalWaitEvents();
+CRYSTAL_API void crystalSetWindowTitle(CRYSTALwindow* window, CATALYST_UTF8 title, CATALYST_RESULT* result);
+CRYSTAL_API void crystalGetWindowTitle(CRYSTALwindow* window, CATALYST_UTF8W title, CATALYST_NUINT capacity, CATALYST_NUINT* length, CATALYST_RESULT* result);
 CRYSTAL_API void crystalDestroyWindow(CRYSTALwindow* window, CATALYST_RESULT* result);
 CRYSTAL_API void crystalSetWindowClosingCallback(CRYSTALwindow* window, CRYSTALwindowClosingCallback callback);
 

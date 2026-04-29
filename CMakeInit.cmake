@@ -61,7 +61,7 @@ function(configure target_vendor target_system target_architecture)
     set(CMAKE_STATIC_LIBRARY_PREFIX "" PARENT_SCOPE)
     message(STATUS "Stripped library prefixes for shared and static libraries")
 
-    # WIN32
+    # Identify target platform
     if(TARGET_VENDOR STREQUAL "microsoft" AND (TARGET_SYSTEM MATCHES "^nt" OR TARGET_SYSTEM MATCHES "^win"))
         set(CONFIGURE_FOUND_PLATFORM 1)
         set(TARGET_PLATFORM_WIN32 1 PARENT_SCOPE)
@@ -70,8 +70,6 @@ function(configure target_vendor target_system target_architecture)
         set(TARGET_PLATFORM_WIN32 0 PARENT_SCOPE)
         add_compile_definitions(TARGET_PLATFORM_WIN32=0)
     endif()
-
-    # DARWIN
     if(TARGET_VENDOR STREQUAL "apple" AND TARGET_SYSTEM MATCHES "^darwin")
         set(CONFIGURE_FOUND_PLATFORM 1)
         set(TARGET_PLATFORM_DARWIN 1 PARENT_SCOPE)
@@ -79,10 +77,18 @@ function(configure target_vendor target_system target_architecture)
     else()
         set(TARGET_PLATFORM_DARWIN 0 PARENT_SCOPE)
     endif()
-
-    # UNKNOWN
     if(NOT CONFIGURE_FOUND_PLATFORM)
-        message(WARNING "Unable to identify a target platform based on vendor '${TARGET_VENDOR}' and system '${TARGET_SYSTEM}'")
+        message(FATAL_ERROR "Unable to identify a target platform based on vendor '${TARGET_VENDOR}' and system '${TARGET_SYSTEM}'")
+    endif()
+
+    # Identify UNICODE support
+    if(TARGET_VENDOR STREQUAL "microsoft" AND (TARGET_SYSTEM MATCHES "^nt"))
+        set(TARGET_SUPPORTS_UNICODE 1 PARENT_SCOPE)
+    elseif(TARGET_VENDOR STREQUAL "apple" AND TARGET_SYSTEM MATCHES "^darwin")
+        # TODO: Determine when the cutoff for UNICODE support on Darwin is, and condition this on the version
+        set(TARGET_SUPPORTS_UNICODE 1 PARENT_SCOPE)
+    else()
+        set(TARGET_SUPPORTS_UNICODE 0 PARENT_SCOPE)
     endif()
 
     # Identify the STDC version
@@ -150,6 +156,7 @@ function(define config_file_name config_header_name)
         TARGET_PLATFORM_DARWIN=${TARGET_PLATFORM_DARWIN}
         TARGET_STDC_VERSION=${TARGET_STDC_VERSION}
         TARGET_SIZEOF_VOID_P=${TARGET_SIZEOF_VOID_P}
+        TARGET_SUPPORTS_UNICODE=${TARGET_SUPPORTS_UNICODE}
     )
     message(STATUS "Added compile definition METADATA_NAME=\"${METADATA_NAME}\"")
     message(STATUS "Added compile definition METADATA_VERSION_MAJOR=${METADATA_VERSION_MAJOR}")
@@ -164,6 +171,7 @@ function(define config_file_name config_header_name)
     message(STATUS "Added compile definition TARGET_PLATFORM_DARWIN=${TARGET_PLATFORM_DARWIN}")
     message(STATUS "Added compile definition TARGET_STDC_VERSION=${TARGET_STDC_VERSION}")
     message(STATUS "Added compile definition TARGET_SIZEOF_VOID_P=${TARGET_SIZEOF_VOID_P}")
+    message(STATUS "Added compile definition TARGET_SUPPORTS_UNICODE=${TARGET_SUPPORTS_UNICODE}")
 
     # Process the configuration file/header
     if(EXISTS "${CMAKE_SOURCE_DIR}/${config_file_name}")

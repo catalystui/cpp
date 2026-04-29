@@ -27,6 +27,14 @@ inline void waitEvents() {
     ::crystalWaitEvents();
 }
 
+inline void setWindowTitle(window* window, UTF8 title, RESULT* result) {
+    ::crystalSetWindowTitle(window, title, result);
+}
+
+inline void getWindowTitle(window* window, UTF8W title, NUINT capacity, NUINT* length, RESULT* result) {
+    ::crystalGetWindowTitle(window, title, capacity, length, result);
+}
+
 inline void setWindowClosingCallback(window* window, windowClosingCallback callback) {
     ::crystalSetWindowClosingCallback(window, callback);
 }

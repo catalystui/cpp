@@ -149,6 +149,109 @@ void crystalProcessEvents(catalyst::BOOL wait) {
     }
 }
 
+extern "C" void crystalSetWindowTitle(CRYSTALwindow* window, catalyst::UTF8 title, catalyst::RESULT* result) {
+    @autoreleasepool {
+        if (window == 0) {
+            if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
+            return;
+        }
+        if (title == 0) {
+            if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 1);
+            return;
+        }
+        if (window->native.primary == 0) {
+            if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_STATE, 0, 0, 0);
+            return;
+        }
+
+        // Get the NSWindow reference
+#if __has_feature(objc_arc)
+        NSWindow* nsWindow = (__bridge NSWindow*) (void*) window->native.primary;
+#else
+        NSWindow* nsWindow = (NSWindow*) (void*) window->native.primary;
+#endif
+
+        // Convert UTF-8 title to NSString
+        NSString* nsTitle = [NSString stringWithUTF8String:(const char*) title];
+        if (nsTitle == nil) {
+            if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 1);
+            return;
+        }
+
+        // Apply the title and report success
+        [nsWindow setTitle:nsTitle];
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_SUCCESS, 0, 0, 0);
+    }
+}
+
+extern "C" void crystalGetWindowTitle(CRYSTALwindow* window, catalyst::UTF8W title, catalyst::NUINT capacity, catalyst::NUINT* length, catalyst::RESULT* result) {
+    if (window == 0) {
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
+        return;
+    }
+    if (title == 0) {
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 1);
+        return;
+    }
+    if (capacity == 0) {
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 2);
+        return;
+    }
+    title[0] = (catalyst::BYTE) '\0';
+    if (length == 0) {
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 3);
+        return;
+    }
+    *length = 0;
+    if (window->native.primary == 0) {
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_STATE, 0, 0, 0);
+        return;
+    }
+
+    // Get the NSWindow reference
+#if __has_feature(objc_arc)
+        NSWindow* nsWindow = (__bridge NSWindow*) (void*) window->native.primary;
+#else
+        NSWindow* nsWindow = (NSWindow*) (void*) window->native.primary;
+#endif
+
+    // Convert the title to UTF-8
+    NSString* nsTitle = [nsWindow title];
+    if (nsTitle == nil) {
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_SUCCESS_NOOP, 0, 0, 0);
+        return;
+    }
+    const char* utf8 = [nsTitle UTF8String];
+    if (utf8 == 0) {
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_STATE, 0, 0, 0);
+        return;
+    }
+
+    // Determine the required length
+    catalyst::NUINT required = 0;
+    while (utf8[required] != '\0') {
+        if (++required == (catalyst::NUINT) -1) {
+            if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_BUFFER_OVERFLOW, 0, 0, 0);
+            return;
+        }
+    }
+    *length = required;
+
+    // Copy the title and report success
+    catalyst::NUINT writable = capacity - 1;
+    catalyst::NUINT i = 0;
+    while (i < writable && i < required) {
+        title[i] = (catalyst::BYTE) utf8[i];
+        i += 1;
+    }
+    title[i] = (catalyst::BYTE) '\0';
+    if (i < required) {
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_WARNING_PARTIAL, 0, 0, 0);
+        return;
+    }
+    if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_SUCCESS, 0, 0, 0);
+}
+
 extern "C" void crystalDestroyWindow(CRYSTALwindow* window, catalyst::RESULT* result) {
     @autoreleasepool {
         if (window == 0) {
