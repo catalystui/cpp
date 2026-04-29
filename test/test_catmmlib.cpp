@@ -31,7 +31,7 @@ int main() {
     result = RESULT();
 
     printf("Allocating 64 bytes...\n");
-    catalyst::memory::alloc(&memory, 64, &result);
+    catalyst::alloc(&memory, 64, &result);
     printResult("alloc", result);
 
     if (!statusCodeIsSuccess(result.status)) {
@@ -73,7 +73,7 @@ int main() {
      * --------------------------------------------------------------------------------------------- */
 
     printf("Reallocating 64 bytes to 128 bytes...\n");
-    catalyst::memory::realloc(&memory, 128, &result);
+    catalyst::realloc(&memory, 128, &result);
     printResult("realloc grow", result);
 
     if (!statusCodeIsSuccess(result.status)) {
@@ -119,7 +119,7 @@ int main() {
      * --------------------------------------------------------------------------------------------- */
 
     printf("Reallocating 128 bytes down to 32 bytes...\n");
-    catalyst::memory::realloc(&memory, 32, &result);
+    catalyst::realloc(&memory, 32, &result);
     printResult("realloc shrink", result);
 
     if (!statusCodeIsSuccess(result.status)) {
@@ -151,7 +151,7 @@ int main() {
      * --------------------------------------------------------------------------------------------- */
 
     printf("Reallocating to 0 bytes. This should free the memory...\n");
-    catalyst::memory::realloc(&memory, 0, &result);
+    catalyst::realloc(&memory, 0, &result);
     printResult("realloc zero", result);
 
     if (!statusCodeIsSuccess(result.status)) {
@@ -171,7 +171,7 @@ int main() {
      * --------------------------------------------------------------------------------------------- */
 
     printf("Testing realloc with null pointer. This should behave like alloc...\n");
-    catalyst::memory::realloc(&memory, 16, &result);
+    catalyst::realloc(&memory, 16, &result);
     printResult("realloc null", result);
 
     if (!statusCodeIsSuccess(result.status)) {
@@ -206,7 +206,7 @@ int main() {
      * --------------------------------------------------------------------------------------------- */
 
     printf("Freeing final allocation...\n");
-    catalyst::memory::free(memory, &result);
+    catalyst::free(memory, &result);
     printResult("free final", result);
 
     if (!statusCodeIsSuccess(result.status)) {

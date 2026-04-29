@@ -23,6 +23,21 @@ configure_target(
     SOURCES
         src/CATMMLIB.cpp
 )
+if (TARGET_PLATFORM_DARWIN)
+    configure_target(
+        TARGETS CATMMLIB_SHARED CATMMLIB_STATIC
+        SOURCES
+            src/CATMMLIB.darwin.mm
+    )
+elseif(TARGET_PLATFORM_WIN32)
+    configure_target(
+        TARGETS CATMMLIB_SHARED CATMMLIB_STATIC
+        SOURCES
+            src/CATMMLIB.win32.cpp
+    )
+else()
+    message(WARNING "No platform-specific source files configured for CATMMLIB!")
+endif()
 
 # CATTELIB
 add_library(CATTELIB_SHARED SHARED)
@@ -54,6 +69,14 @@ if(TARGET_PLATFORM_DARWIN)
         DEPENDS
             "-framework Cocoa"
     )
+elseif(TARGET_PLATFORM_WIN32)
+    configure_target(
+        TARGETS CRYSTAL_SHARED CRYSTAL_STATIC
+        SOURCES
+            src/modules/crystal/CRYSTAL.win32.cpp
+    )
+else()
+    message(WARNING "No platform-specific source files configured for CRYSTAL!")
 endif()
 
 # TEST

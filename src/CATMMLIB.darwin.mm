@@ -1,17 +1,15 @@
 #include "CMAKECFG.h"
-#if TARGET_PLATFORM_WIN32
+#if TARGET_PLATFORM_DARWIN
 
 #include "CATCRLIB.hpp"
 #include "CATMMLIB.h"
 
-#ifndef WIN32_LEAN_AND_MEAN
-    #define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
+#import <mach/mach.h>
 
 using namespace catalyst;
 
 extern "C" void catmmAlloc(void** memory, NUINT size, RESULT* result) {
+    // Validate, initialize parameters
     if (memory == 0) {
         if (result != 0) *result = RESULT(STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
         return;
@@ -28,8 +26,8 @@ extern "C" void catmmAlloc(void** memory, NUINT size, RESULT* result) {
         if (result != 0) *result = RESULT(STATUS_CODE_ERROR_BUFFER_OVERFLOW, 0, 0, 0);
         return;
     }
-    void* address = VirtualAlloc(0, (SIZE_T) totalSize, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
-    if (address == 0) {
+    vm_address_t address = 0;
+    if (vm_allocate(mach_task_self(), &address, (vm_size_t) totalSize, VM_FLAGS_ANYWHERE) != KERN_SUCCESS) {
         if (result != 0) *result = RESULT(STATUS_CODE_ERROR_ALLOCATION_FAILED, 0, 0, 0);
         return;
     }
@@ -52,11 +50,12 @@ extern "C" void catmmFree(void* memory, RESULT* result) {
     // Get header then deallocate
     BYTE* bytes = (BYTE*) memory;
     CATALYST_MEMORY_HEADER* header = (CATALYST_MEMORY_HEADER*) (bytes - sizeof(CATALYST_MEMORY_HEADER));
-    if (!VirtualFree((void*) header, 0, MEM_RELEASE)) {
+    kern_return_t deallocResult = vm_deallocate(mach_task_self(), (vm_address_t) header, (vm_size_t) header->allocated_size);
+    if (deallocResult != KERN_SUCCESS) {
         if (result != 0) *result = RESULT(STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
         return;
     }
     if (result != 0) *result = RESULT(STATUS_CODE_SUCCESS, 0, 0, 0);
 }
 
-#endif /* TARGET_PLATFORM_WIN32 */
+#endif /* TARGET_PLATFORM_DARWIN */

@@ -1,3 +1,6 @@
+#include "CMAKECFG.h"
+#if TARGET_PLATFORM_DARWIN
+
 #include "CATCRLIB.hpp"
 #include "CATMMLIB.hpp"
 #include "CATTELIB.hpp"
@@ -34,7 +37,7 @@ extern "C" CRYSTALwindow* crystalCreateWindow(catalyst::RESULT* result) {
     @autoreleasepool {
         CRYSTALwindow* window = 0;
         catalyst::RESULT dependencyResult;
-        catalyst::memory::alloc((void**) &window, (catalyst::NUINT) sizeof(CRYSTALwindow), &dependencyResult);
+        catalyst::alloc((void**) &window, (catalyst::NUINT) sizeof(CRYSTALwindow), &dependencyResult);
         if (window == 0) {
             if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_DEPENDENCY_FAILURE, 0, 1, dependencyResult.status);
             return 0;
@@ -59,7 +62,7 @@ extern "C" CRYSTALwindow* crystalCreateWindow(catalyst::RESULT* result) {
             defer:NO];
 
         if (nsWindow == nil) {
-            catalyst::memory::free(window, 0);
+            catalyst::free(window, 0);
             if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_ALLOCATION_FAILED, 0, 2, 0);
             return 0;
         }
@@ -70,7 +73,7 @@ extern "C" CRYSTALwindow* crystalCreateWindow(catalyst::RESULT* result) {
 #if !__has_feature(objc_arc)
             [nsWindow release];
 #endif
-            catalyst::memory::free(window, 0);
+            catalyst::free(window, 0);
             if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_ALLOCATION_FAILED, 0, 3, 0);
             return 0;
         }
@@ -182,7 +185,7 @@ extern "C" void crystalDestroyWindow(CRYSTALwindow* window, catalyst::RESULT* re
         window->closingCallback = 0;
 
         catalyst::RESULT dependencyResult;
-        catalyst::memory::free(window, &dependencyResult);
+        catalyst::free(window, &dependencyResult);
         if (!catalyst::statusCodeIsSuccess(dependencyResult.status)) {
             if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_DEPENDENCY_FAILURE, 0, 1, dependencyResult.status);
             return;
@@ -268,3 +271,5 @@ extern "C" void crystalSetWindowClosingCallback(CRYSTALwindow* window, CRYSTALwi
     if (window == 0) return;
     window->closingCallback = callback;
 }
+
+#endif /* TARGET_PLATFORM_DARWIN */

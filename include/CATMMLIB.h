@@ -18,6 +18,11 @@ extern "C" {
     #define CATMMLIB_API
 #endif
 
+typedef struct CATALYST_MEMORY_HEADER {
+    CATALYST_NUINT requested_size;
+    CATALYST_NUINT allocated_size;
+} CATALYST_MEMORY_HEADER;
+
 CATMMLIB_API void catmmAlloc(void** memory, CATALYST_NUINT size, CATALYST_RESULT* result);
 
 CATMMLIB_API void catmmRealloc(void** memory, CATALYST_NUINT size, CATALYST_RESULT* result);

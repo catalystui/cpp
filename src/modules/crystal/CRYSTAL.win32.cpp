@@ -1,3 +1,6 @@
+#include "CMAKECFG.h"
+#if TARGET_PLATFORM_WIN32
+
 #include "CATCRLIB.hpp"
 #include "CATMMLIB.hpp"
 #include "CRYSTAL.internal.hpp"
@@ -56,7 +59,7 @@ static LRESULT CALLBACK crystalWin32WindowProc(HWND hwnd, UINT message, WPARAM w
 CRYSTALwindow* crystalCreateWindow(catalyst::RESULT* result) {
     CRYSTALwindow* window = 0;
     catalyst::RESULT dependencyResult;
-    catalyst::memory::alloc((void**) &window, (catalyst::NUINT) sizeof(CRYSTALwindow), &dependencyResult);
+    catalyst::alloc((void**) &window, (catalyst::NUINT) sizeof(CRYSTALwindow), &dependencyResult);
     if (window == 0) {
         if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_DEPENDENCY_FAILURE, 0, 1, dependencyResult.status);
         return 0;
@@ -75,7 +78,7 @@ CRYSTALwindow* crystalCreateWindow(catalyst::RESULT* result) {
     wc.hCursor = LoadCursor(NULL, IDC_ARROW);
     wc.hbrBackground = (HBRUSH) (COLOR_WINDOW + 1);
     if (RegisterClass(&wc) == 0) {
-        catalyst::memory::free(window, 0);
+        catalyst::free(window, 0);
         if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_DEPENDENCY_FAILURE, 0, 2, 0);
         return 0;
     }
@@ -93,7 +96,7 @@ CRYSTALwindow* crystalCreateWindow(catalyst::RESULT* result) {
         window
     );
     if (hwnd == NULL) {
-                catalyst::memory::free(window, 0);
+                catalyst::free(window, 0);
         if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_DEPENDENCY_FAILURE, 0, 3, 0);
         return 0;
     }
@@ -147,7 +150,7 @@ void crystalDestroyWindow(CRYSTALwindow* window, catalyst::RESULT* result) {
     window->closingCallback = 0;
 
     catalyst::RESULT dependencyResult;
-    catalyst::memory::free(window, &dependencyResult);
+    catalyst::free(window, &dependencyResult);
     if (!catalyst::statusCodeIsSuccess(dependencyResult.status)) {
         if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_DEPENDENCY_FAILURE, 0, 1, dependencyResult.status);
         return;
@@ -169,3 +172,5 @@ void crystalSetWindowClosingCallback(CRYSTALwindow* window, CRYSTALwindowClosing
     if (window == 0) return;
     window->closingCallback = callback;
 }
+
+#endif /* TARGET_PLATFORM_WIN32 */
