@@ -2,7 +2,7 @@
 #define CATCRLIB_H
 
 #include "CMAKECFG.h"
-#if defined(CMAKECFG_STDC_VERSION) && (CMAKECFG_STDC_VERSION >= 199901L)
+#if defined(TARGET_STDC_VERSION) && (TARGET_STDC_VERSION >= 199901L)
 #include "CATCRLIB.C99.h"
 #else
 #include "CATCRLIB.C90.h"
@@ -43,27 +43,27 @@ typedef CATALYST_BYTE CATALYST_BOOL;
 #define CATALYST_TRUE    ((CATALYST_BOOL) 1)
 #define CATALYST_FALSE   ((CATALYST_BOOL) 0)
 
-#ifndef CMAKECFG_SIZEOF_VOID_P
-    #error "CATCRLIB.h :: Unsupported Platform :: Unable to determine pointer size, CMAKECFG_SIZEOF_VOID_P was not defined."
+#ifndef TARGET_SIZEOF_VOID_P
+    #error "CATCRLIB.h :: Unsupported Platform :: Unable to determine pointer size, TARGET_SIZEOF_VOID_P was not defined."
 #endif
-#if CMAKECFG_SIZEOF_VOID_P == 1
+#if TARGET_SIZEOF_VOID_P == 1
     typedef CATALYST_SBYTE  CATALYST_NINT;
     typedef CATALYST_BYTE   CATALYST_NUINT;
-#elif CMAKECFG_SIZEOF_VOID_P == 2
+#elif TARGET_SIZEOF_VOID_P == 2
     #if CATCRLIB_SUPPORTS_16BIT
         typedef CATALYST_SHORT  CATALYST_NINT;
         typedef CATALYST_USHORT CATALYST_NUINT;
     #else
         #error "CATCRLIB.h :: Unsupported Platform :: Compiler specifies 16-bit pointers but no 16-bit integer type exists."
     #endif
-#elif CMAKECFG_SIZEOF_VOID_P == 4
+#elif TARGET_SIZEOF_VOID_P == 4
     #if CATCRLIB_SUPPORTS_32BIT
         typedef CATALYST_INT    CATALYST_NINT;
         typedef CATALYST_UINT   CATALYST_NUINT;
     #else
         #error "CATCRLIB.h :: Unsupported Platform :: Compiler specifies 32-bit pointers but no 32-bit integer type exists."
     #endif
-#elif CMAKECFG_SIZEOF_VOID_P == 8
+#elif TARGET_SIZEOF_VOID_P == 8
     #if CATCRLIB_SUPPORTS_64BIT
         typedef CATALYST_LONG   CATALYST_NINT;
         typedef CATALYST_ULONG  CATALYST_NUINT;

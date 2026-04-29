@@ -1,0 +1,11 @@
+{
+    "configurations": [
+        {
+            "name": "CatalystUI",
+            "includePath": [
+                "${workspaceFolder}/**"
+            ]
+        }
+    ],
+    "version": 4
+}
