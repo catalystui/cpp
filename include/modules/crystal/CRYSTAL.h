@@ -25,29 +25,17 @@ extern "C" {
 typedef struct CRYSTALwindow CRYSTALwindow;
 
 typedef struct CRYSTALnative {
-    CATALYST_NUINT primary;
-    CATALYST_NUINT secondary;
-    CATALYST_NUINT tertiary;
+    CATALYST_NUINT primary; /* Primary native handle (HWND, NSWindow*, etc) */
+    CATALYST_NUINT secondary; /* Secondary native handle (HINSTANCE, NSApplication*, etc) */
+    CATALYST_NUINT tertiary; /* Tertiary native handle (HDC, NSView*, etc) */
 } CRYSTALnative;
 
-typedef CATALYST_BOOL (*CRYSTALwindowClosingCallback)(CRYSTALwindow* window, void* pointer);
+typedef CATALYST_BOOL (*CRYSTALwindowClosingCallback) (CRYSTALwindow* window);
 
 CRYSTAL_API CRYSTALwindow* crystalCreateWindow(CATALYST_RESULT* result);
-
 CRYSTAL_API void crystalPollEvents();
-
 CRYSTAL_API void crystalWaitEvents();
-
-CRYSTAL_API void crystalSetWindowUserPointer(CRYSTALwindow* window, void* pointer);
-
-CRYSTAL_API void* crystalGetWindowUserPointer(CRYSTALwindow* window);
-
-CRYSTAL_API void crystalSetWindowTitle(CRYSTALwindow* window, CATALYST_UTF8 title);
-
-CRYSTAL_API void crystalGetWindowTitle(CRYSTALwindow* window, CATALYST_UTF8W title, CATALYST_NUINT capacity, CATALYST_NUINT* length);
-
 CRYSTAL_API void crystalDestroyWindow(CRYSTALwindow* window, CATALYST_RESULT* result);
-
 CRYSTAL_API void crystalSetWindowClosingCallback(CRYSTALwindow* window, CRYSTALwindowClosingCallback callback);
 
 #ifdef __cplusplus

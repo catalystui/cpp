@@ -27,22 +27,6 @@ inline void waitEvents() {
     ::crystalWaitEvents();
 }
 
-inline void setUserPointer(window* window, void* pointer) {
-    ::crystalSetUserPointer(window, pointer);
-}
-
-inline void* getUserPointer(window* window) {
-    return ::crystalGetUserPointer(window);
-}
-
-inline void setWindowTitle(window* window, UTF8 title) {
-    ::crystalSetWindowTitle(window, title);
-}
-
-inline void getWindowTitle(window* window, UTF8W title, NUINT capacity, NUINT* length) {
-    ::crystalGetWindowTitle(window, title, capacity, length);
-}
-
 inline void setWindowClosingCallback(window* window, windowClosingCallback callback) {
     ::crystalSetWindowClosingCallback(window, callback);
 }
