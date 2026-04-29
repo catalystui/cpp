@@ -42,6 +42,10 @@ CRYSTAL_API void crystalSetWindowUserPointer(CRYSTALwindow* window, void* pointe
 
 CRYSTAL_API void* crystalGetWindowUserPointer(CRYSTALwindow* window);
 
+CRYSTAL_API void crystalSetWindowTitle(CRYSTALwindow* window, CATALYST_UTF8 title);
+
+CRYSTAL_API void crystalGetWindowTitle(CRYSTALwindow* window, CATALYST_UTF8W title, CATALYST_NUINT capacity, CATALYST_NUINT* length);
+
 CRYSTAL_API void crystalDestroyWindow(CRYSTALwindow* window, CATALYST_RESULT* result);
 
 CRYSTAL_API void crystalSetWindowClosingCallback(CRYSTALwindow* window, CRYSTALwindowClosingCallback callback);

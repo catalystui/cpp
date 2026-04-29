@@ -1,5 +1,6 @@
 #include "CATCRLIB.hpp"
 #include "CATMMLIB.hpp"
+#include "CATTELIB.hpp"
 #include "CRYSTAL.internal.hpp"
 
 #import <Cocoa/Cocoa.h>
@@ -198,6 +199,69 @@ extern "C" void crystalSetWindowUserPointer(CRYSTALwindow* window, void* pointer
 extern "C" void* crystalGetWindowUserPointer(CRYSTALwindow* window) {
     if (window == 0) return 0;
     return window->udata;
+}
+
+extern "C" void crystalSetWindowTitle(CRYSTALwindow* window, catalyst::UTF8 title) {
+    @autoreleasepool {
+        if (window == 0) return;
+        if (window->native.primary == 0) return;
+        if (title == 0) return;
+
+#if __has_feature(objc_arc)
+        NSWindow* nsWindow = (__bridge NSWindow*) (void*) window->native.primary;
+#else
+        NSWindow* nsWindow = (NSWindow*) (void*) window->native.primary;
+#endif
+
+        if (nsWindow == nil) return;
+
+        NSString* nsTitle = [NSString stringWithUTF8String:(const char*) title];
+
+        if (nsTitle == nil) {
+            return;
+        }
+
+        [nsWindow setTitle:nsTitle];
+    }
+}
+
+extern "C" void crystalGetWindowTitle(
+    CRYSTALwindow* window,
+    catalyst::UTF8W title,
+    catalyst::NUINT capacity,
+    catalyst::NUINT* length
+) {
+    @autoreleasepool {
+        if (length != 0) *length = 0;
+        if (window == 0) return;
+        if (window->native.primary == 0) return;
+#if __has_feature(objc_arc)
+        NSWindow* nsWindow = (__bridge NSWindow*) (void*) window->native.primary;
+#else
+        NSWindow* nsWindow = (NSWindow*) (void*) window->native.primary;
+#endif
+        if (nsWindow == nil) return;
+        NSString* nsTitle = [nsWindow title];
+        if (nsTitle == nil) return;
+        const char* utf8 = [nsTitle UTF8String];
+        if (utf8 == 0) return;
+        catalyst::NUINT required = 0;
+        while (utf8[required] != '\0') {
+            if (++required == (catalyst::NUINT) -1) {
+                return;
+            }
+        }
+        if (length != 0) *length = required;
+        if (title == 0) return;
+        if (capacity == 0) return;
+        catalyst::NUINT index = 0;
+        catalyst::NUINT writable = capacity - 1;
+        while (index < writable && index < required) {
+            title[index] = (catalyst::BYTE) utf8[index];
+            ++index;
+        }
+        title[index] = (catalyst::BYTE) '\0';
+    }
 }
 
 extern "C" void crystalSetWindowClosingCallback(CRYSTALwindow* window, CRYSTALwindowClosingCallback callback) {

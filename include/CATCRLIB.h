@@ -108,8 +108,8 @@ typedef CATALYST_UTF8_CODE_UNIT* CATALYST_UTF8W;
 typedef const CATALYST_UTF8_CODE_UNIT* CATALYST_UTF8;
 
 typedef struct CATALYST_UTF16LE_CODE_UNIT {
-    CATALYST_BYTE msb; /* Most significant byte of the code unit. */
-    CATALYST_BYTE lsb; /* Least significant byte of the code unit. */
+    CATALYST_BYTE lsb; /* Least significant byte of the codepoint. */
+    CATALYST_BYTE msb; /* Most significant byte of the codepoint. */
 
     #if defined(__cplusplus)
         CATALYST_CONSTEXPR CATALYST_UTF16LE_CODE_UNIT() : msb(0), lsb(0) {}
