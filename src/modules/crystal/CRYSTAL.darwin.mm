@@ -102,6 +102,7 @@ extern "C" CRYSTALwindow* crystalCreateWindow(catalyst::RESULT* result) {
         [nsWindow setReleasedWhenClosed:NO];
         [nsWindow setTitle:@CRYSTAL_DEFAULT_TITLE];
         [nsWindow setDelegate:delegate];
+        [nsWindow center];
         [nsWindow makeKeyAndOrderFront:nil];
         [nsApplication activateIgnoringOtherApps:YES];
 
@@ -210,9 +211,9 @@ extern "C" void crystalGetWindowTitle(CRYSTALwindow* window, catalyst::UTF8W tit
 
     // Get the NSWindow reference
 #if __has_feature(objc_arc)
-        NSWindow* nsWindow = (__bridge NSWindow*) (void*) window->native.primary;
+    NSWindow* nsWindow = (__bridge NSWindow*) (void*) window->native.primary;
 #else
-        NSWindow* nsWindow = (NSWindow*) (void*) window->native.primary;
+    NSWindow* nsWindow = (NSWindow*) (void*) window->native.primary;
 #endif
 
     // Convert the title to UTF-8
@@ -252,6 +253,293 @@ extern "C" void crystalGetWindowTitle(CRYSTALwindow* window, catalyst::UTF8W tit
     if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_SUCCESS, 0, 0, 0);
 }
 
+// TODO: Document opcode 1 for failed to get NSScreen
+extern "C" void crystalSetWindowPosition(CRYSTALwindow* window, catalyst::NUINT x, catalyst::NUINT y, catalyst::RESULT* result) {
+    @autoreleasepool {
+        if (window == 0) {
+            if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
+            return;
+        }
+        if (window->native.primary == 0) {
+            if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_STATE, 0, 0, 0);
+            return;
+        }
+
+        // Get the NSWindow reference
+#if __has_feature(objc_arc)
+        NSWindow* nsWindow = (__bridge NSWindow*) (void*) window->native.primary;
+#else
+        NSWindow* nsWindow = (NSWindow*) (void*) window->native.primary;
+#endif
+
+        // Get the NSScreen reference
+        NSScreen* nsScreen = [nsWindow screen];
+        if (nsScreen == nil) {
+            nsScreen = [NSScreen mainScreen];
+        }
+        if (nsScreen == nil) {
+            if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_DEPENDENCY_FAILURE, 0, 1, 0);
+            return;
+        }
+
+        // Convert top-left coordinates into Cocoa screen coordinates
+        NSRect nsScreenFrame = [nsScreen frame];
+        CGFloat nsTop = NSMaxY(nsScreenFrame);
+        NSPoint nsTopLeft = NSMakePoint((CGFloat) x, nsTop - (CGFloat) y);
+
+        // Apply position and report success
+        [nsWindow setFrameTopLeftPoint:nsTopLeft];
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_SUCCESS, 0, 0, 0);
+    }
+}
+
+extern "C" void crystalGetWindowPosition(CRYSTALwindow* window, catalyst::NUINT* x, catalyst::NUINT* y, catalyst::RESULT* result) {
+    @autoreleasepool {
+        if (window == 0) {
+            if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
+            return;
+        }
+        if (x == 0) {
+            if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 1);
+            return;
+        }
+        *x = 0;
+        if (y == 0) {
+            if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 2);
+            return;
+        }
+        *y = 0;
+        if (window->native.primary == 0) {
+            if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_STATE, 0, 0, 0);
+            return;
+        }
+
+        // Get the NSWindow reference
+#if __has_feature(objc_arc)
+        NSWindow* nsWindow = (__bridge NSWindow*) (void*) window->native.primary;
+#else
+        NSWindow* nsWindow = (NSWindow*) (void*) window->native.primary;
+#endif
+
+        // Get the NSScreen reference
+        NSScreen* nsScreen = [nsWindow screen];
+        if (nsScreen == nil) {
+            nsScreen = [NSScreen mainScreen];
+        }
+        if (nsScreen == nil) {
+            if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_DEPENDENCY_FAILURE, 0, 1, 0);
+            return;
+        }
+
+        // Convert Cocoa screen coordinates into top-left coordinates
+        NSRect nsWindowFrame = [nsWindow frame];
+        NSRect nsScreenFrame = [nsScreen frame];
+        CGFloat nsTop = NSMaxY(nsScreenFrame);
+        *x = (catalyst::NUINT) nsWindowFrame.origin.x;
+        *y = (catalyst::NUINT) (nsTop - NSMaxY(nsWindowFrame));
+
+        // Report success
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_SUCCESS, 0, 0, 0);
+    }
+}
+
+extern "C" void crystalSetWindowSize(CRYSTALwindow* window, catalyst::NUINT width, catalyst::NUINT height, catalyst::RESULT* result) {
+    @autoreleasepool {
+        if (window == 0) {
+            if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
+            return;
+        }
+        if (width == 0) {
+            if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 1);
+            return;
+        }
+        if (height == 0) {
+            if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 2);
+            return;
+        }
+        if (window->native.primary == 0) {
+            if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_STATE, 0, 0, 0);
+            return;
+        }
+
+        // Get the NSWindow reference
+#if __has_feature(objc_arc)
+        NSWindow* nsWindow = (__bridge NSWindow*) (void*) window->native.primary;
+#else
+        NSWindow* nsWindow = (NSWindow*) (void*) window->native.primary;
+#endif
+
+        // Clamp the size to the window's content size limits
+        NSSize nsMinSize = [nsWindow contentMinSize];
+        NSSize nsMaxSize = [nsWindow contentMaxSize];
+        CGFloat nsWidth = (CGFloat) width;
+        CGFloat nsHeight = (CGFloat) height;
+
+        if (nsWidth < nsMinSize.width) {
+            nsWidth = nsMinSize.width;
+        }
+        if (nsHeight < nsMinSize.height) {
+            nsHeight = nsMinSize.height;
+        }
+        if (nsWidth > nsMaxSize.width) {
+            nsWidth = nsMaxSize.width;
+        }
+        if (nsHeight > nsMaxSize.height) {
+            nsHeight = nsMaxSize.height;
+        }
+
+        // Preserve the top-left point while changing the content size
+        NSRect nsFrame = [nsWindow frame];
+        CGFloat nsTop = NSMaxY(nsFrame);
+
+        NSRect nsContent = [nsWindow contentRectForFrameRect:nsFrame];
+        nsContent.size = NSMakeSize(nsWidth, nsHeight);
+
+        NSRect nsNewFrame = [nsWindow frameRectForContentRect:nsContent];
+        nsNewFrame.origin.x = nsFrame.origin.x;
+        nsNewFrame.origin.y = nsTop - nsNewFrame.size.height;
+
+        // Apply the size and report success
+        [nsWindow setFrame:nsNewFrame display:YES];
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_SUCCESS, 0, 0, 0);
+    }
+}
+
+extern "C" void crystalGetWindowSize(CRYSTALwindow* window, catalyst::NUINT* width, catalyst::NUINT* height, catalyst::RESULT* result) {
+    @autoreleasepool {
+        if (window == 0) {
+            if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
+            return;
+        }
+        if (width == 0) {
+            if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 1);
+            return;
+        }
+        *width = 0;
+        if (height == 0) {
+            if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 2);
+            return;
+        }
+        *height = 0;
+        if (window->native.primary == 0) {
+            if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_STATE, 0, 0, 0);
+            return;
+        }
+
+        // Get the NSWindow reference
+#if __has_feature(objc_arc)
+        NSWindow* nsWindow = (__bridge NSWindow*) (void*) window->native.primary;
+#else
+        NSWindow* nsWindow = (NSWindow*) (void*) window->native.primary;
+#endif
+
+        // Get the content size
+        NSRect nsContent = [nsWindow contentRectForFrameRect:[nsWindow frame]];
+        *width = (catalyst::NUINT) nsContent.size.width;
+        *height = (catalyst::NUINT) nsContent.size.height;
+
+        // Report success
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_SUCCESS, 0, 0, 0);
+    }
+}
+
+extern "C" void crystalSetWindowSizeLimits(CRYSTALwindow* window, catalyst::NUINT minWidth, catalyst::NUINT minHeight, catalyst::NUINT maxWidth, catalyst::NUINT maxHeight, catalyst::RESULT* result) {
+    @autoreleasepool {
+        if (window == 0) {
+            if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
+            return;
+        }
+        if (maxWidth != 0 && minWidth != 0 && maxWidth < minWidth) {
+            if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 3);
+            return;
+        }
+        if (maxHeight != 0 && minHeight != 0 && maxHeight < minHeight) {
+            if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 4);
+            return;
+        }
+        if (window->native.primary == 0) {
+            if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_STATE, 0, 0, 0);
+            return;
+        }
+
+        // Get the NSWindow reference
+#if __has_feature(objc_arc)
+        NSWindow* nsWindow = (__bridge NSWindow*) (void*) window->native.primary;
+#else
+        NSWindow* nsWindow = (NSWindow*) (void*) window->native.primary;
+#endif
+
+        // Convert Catalyst size-limit semantics into Cocoa size-limit semantics
+        CGFloat nsMinWidth = minWidth == 0 ? 0.0 : (CGFloat) minWidth;
+        CGFloat nsMinHeight = minHeight == 0 ? 0.0 : (CGFloat) minHeight;
+        CGFloat nsMaxWidth = maxWidth == 0 || maxWidth == (catalyst::NUINT) -1 ? CGFLOAT_MAX : (CGFloat) maxWidth;
+        CGFloat nsMaxHeight = maxHeight == 0 || maxHeight == (catalyst::NUINT) -1 ? CGFLOAT_MAX : (CGFloat) maxHeight;
+
+        // Apply content size limits
+        NSSize nsMinSize = NSMakeSize(nsMinWidth, nsMinHeight);
+        NSSize nsMaxSize = NSMakeSize(nsMaxWidth, nsMaxHeight);
+
+        [nsWindow setContentMinSize:nsMinSize];
+        [nsWindow setContentMaxSize:nsMaxSize];
+
+        // Report success
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_SUCCESS, 0, 0, 0);
+    }
+}
+
+extern "C" void crystalGetWindowSizeLimits(CRYSTALwindow* window, catalyst::NUINT* minWidth, catalyst::NUINT* minHeight, catalyst::NUINT* maxWidth, catalyst::NUINT* maxHeight, catalyst::RESULT* result) {
+    @autoreleasepool {
+        if (window == 0) {
+            if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
+            return;
+        }
+        if (minWidth == 0) {
+            if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 1);
+            return;
+        }
+        *minWidth = 0;
+        if (minHeight == 0) {
+            if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 2);
+            return;
+        }
+        *minHeight = 0;
+        if (maxWidth == 0) {
+            if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 3);
+            return;
+        }
+        *maxWidth = 0;
+        if (maxHeight == 0) {
+            if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 4);
+            return;
+        }
+        *maxHeight = 0;
+        if (window->native.primary == 0) {
+            if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_STATE, 0, 0, 0);
+            return;
+        }
+
+        // Get the NSWindow reference
+#if __has_feature(objc_arc)
+        NSWindow* nsWindow = (__bridge NSWindow*) (void*) window->native.primary;
+#else
+        NSWindow* nsWindow = (NSWindow*) (void*) window->native.primary;
+#endif
+
+        // Get content size limits
+        NSSize nsMinSize = [nsWindow contentMinSize];
+        NSSize nsMaxSize = [nsWindow contentMaxSize];
+
+        // Convert Cocoa size-limit semantics into Catalyst size-limit semantics
+        *minWidth = nsMinSize.width <= 0.0 ? 0 : (catalyst::NUINT) nsMinSize.width;
+        *minHeight = nsMinSize.height <= 0.0 ? 0 : (catalyst::NUINT) nsMinSize.height;
+        *maxWidth = nsMaxSize.width >= (CGFloat) ((catalyst::NUINT) -1) ? 0 : (catalyst::NUINT) nsMaxSize.width;
+        *maxHeight = nsMaxSize.height >= (CGFloat) ((catalyst::NUINT) -1) ? 0 : (catalyst::NUINT) nsMaxSize.height;
+
+        // Report success
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_SUCCESS, 0, 0, 0);
+    }
+}
+
 extern "C" void crystalDestroyWindow(CRYSTALwindow* window, catalyst::RESULT* result) {
     @autoreleasepool {
         if (window == 0) {
@@ -278,7 +566,7 @@ extern "C" void crystalDestroyWindow(CRYSTALwindow* window, catalyst::RESULT* re
 #if __has_feature(objc_arc)
             CrystalWindowDelegate* delegate = (__bridge_transfer CrystalWindowDelegate*) (void*) window->platform;
 #else
-            CrystalWindowDelegate* delegate = (CrystalWindowDelegate*) (void*) window->platform;
+            CrystalWindowDelegate* delegate = (CrystalWindowDelegate*) window->platform;
 #endif
 
             delegate->window = 0;
