@@ -33,6 +33,14 @@
 #define CRYSTAL_WIN32_DEFAULT_TITLE CRYSTAL_DEFAULT_TITLE
 #endif
 
+#if TARGET_PLATFORM_WIN32 && (!defined(_WIN32_WINNT) || _WIN32_WINNT < 0x0600)
+    #define CRYSTAL_WIN32_DEFAULT_WIDTH   (CRYSTAL_DEFAULT_WIDTH / 2)
+    #define CRYSTAL_WIN32_DEFAULT_HEIGHT  (CRYSTAL_DEFAULT_HEIGHT / 2)
+#else
+    #define CRYSTAL_WIN32_DEFAULT_WIDTH   CRYSTAL_DEFAULT_WIDTH
+    #define CRYSTAL_WIN32_DEFAULT_HEIGHT  CRYSTAL_DEFAULT_HEIGHT
+#endif
+
 typedef struct CRYSTALwin32Platform {
     catalyst::NUINT minWidth;
     catalyst::NUINT minHeight;
@@ -368,8 +376,8 @@ extern "C" CRYSTALwindow* crystalCreateWindow(catalyst::RESULT* result) {
     RECT rect;
     rect.left = 0;
     rect.top = 0;
-    rect.right = CRYSTAL_DEFAULT_WIDTH;
-    rect.bottom = CRYSTAL_DEFAULT_HEIGHT;
+    rect.right = CRYSTAL_WIN32_DEFAULT_WIDTH;
+    rect.bottom = CRYSTAL_WIN32_DEFAULT_HEIGHT;
     AdjustWindowRectEx(&rect, style, FALSE, exStyle);
 
     // Create the window

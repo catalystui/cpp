@@ -1,7 +1,25 @@
 {
     "configurations": [
         {
-            "name": "CatalystUI",
+            "name": "OpenWatcom2 C/C++",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${env:WATCOM}\\h",
+                "${env:WATCOM}\\h\\nt"
+            ],
+            "compilerPath": "",
+            "cStandard": "c89",
+            "cppStandard": "c++98"
+        },
+        {
+            "name": "MSVC++ C/C++",
+            "includePath": [
+                "${workspaceFolder}/**"
+            ],
+            "configurationProvider": "ms-vscode.cmake-tools"
+        },
+        {
+            "name": "Xcode C/C++",
             "includePath": [
                 "${workspaceFolder}/**"
             ]

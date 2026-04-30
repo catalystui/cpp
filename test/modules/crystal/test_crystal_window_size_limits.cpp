@@ -44,6 +44,54 @@ CATALYST_BOOL onWindowClosing(CRYSTALwindow* window) {
     return CATALYST_FALSE;
 }
 
+static CATALYST_NUINT half(CATALYST_NUINT value) {
+    CATALYST_NUINT result;
+
+    result = value / 2;
+
+    if (result == 0) {
+        result = 1;
+    }
+
+    return result;
+}
+
+static CATALYST_NUINT threeQuarters(CATALYST_NUINT value) {
+    CATALYST_NUINT result;
+
+    result = value - (value / 4);
+
+    if (result == 0) {
+        result = 1;
+    }
+
+    return result;
+}
+
+static CATALYST_NUINT fiveQuarters(CATALYST_NUINT value) {
+    CATALYST_NUINT result;
+
+    result = value + (value / 4);
+
+    if (result <= value) {
+        result = value + 1;
+    }
+
+    return result;
+}
+
+static CATALYST_NUINT threeHalves(CATALYST_NUINT value) {
+    CATALYST_NUINT result;
+
+    result = value + (value / 2);
+
+    if (result <= value) {
+        result = value + 1;
+    }
+
+    return result;
+}
+
 static void failLimitsMismatch(
     const char* name,
     CATALYST_NUINT expectedMinWidth,
@@ -234,9 +282,54 @@ static void testSizeAfterLimits(
     );
 }
 
+static int readCurrentSize(
+    CRYSTALwindow* window,
+    CATALYST_NUINT* width,
+    CATALYST_NUINT* height
+) {
+    CATALYST_RESULT result;
+
+    *width = 0;
+    *height = 0;
+
+    crystalGetWindowSize(window, width, height, &result);
+
+    if (result.status != CATALYST_STATUS_CODE_SUCCESS) {
+        fail("crystalGetWindowSize initial", result);
+        return 0;
+    }
+
+    if (*width == 0 || *height == 0) {
+        printf("FAIL: crystalGetWindowSize initial returned zero size\n");
+        printf("  width=%lu height=%lu\n", (unsigned long) *width, (unsigned long) *height);
+        failed += 1;
+        return 0;
+    }
+
+    printf(
+        "Initial window size: width=%lu height=%lu\n",
+        (unsigned long) *width,
+        (unsigned long) *height
+    );
+
+    return 1;
+}
+
 int main() {
     CATALYST_RESULT result;
     CRYSTALwindow* window;
+
+    CATALYST_NUINT baseWidth;
+    CATALYST_NUINT baseHeight;
+
+    CATALYST_NUINT halfWidth;
+    CATALYST_NUINT halfHeight;
+    CATALYST_NUINT minWidth;
+    CATALYST_NUINT minHeight;
+    CATALYST_NUINT maxWidth;
+    CATALYST_NUINT maxHeight;
+    CATALYST_NUINT largeWidth;
+    CATALYST_NUINT largeHeight;
 
     appState.running = 1;
 
@@ -253,47 +346,78 @@ int main() {
 
     drainEvents();
 
+    if (!readCurrentSize(window, &baseWidth, &baseHeight)) {
+        crystalDestroyWindow(window, &result);
+        return 1;
+    }
+
+    halfWidth = half(baseWidth);
+    halfHeight = half(baseHeight);
+
+    minWidth = threeQuarters(baseWidth);
+    minHeight = threeQuarters(baseHeight);
+
+    maxWidth = fiveQuarters(baseWidth);
+    maxHeight = fiveQuarters(baseHeight);
+
+    largeWidth = threeHalves(baseWidth);
+    largeHeight = threeHalves(baseHeight);
+
+    printf(
+        "Derived test sizes: half=%lux%lu min=%lux%lu base=%lux%lu max=%lux%lu large=%lux%lu\n",
+        (unsigned long) halfWidth,
+        (unsigned long) halfHeight,
+        (unsigned long) minWidth,
+        (unsigned long) minHeight,
+        (unsigned long) baseWidth,
+        (unsigned long) baseHeight,
+        (unsigned long) maxWidth,
+        (unsigned long) maxHeight,
+        (unsigned long) largeWidth,
+        (unsigned long) largeHeight
+    );
+
     testSizeLimits(
         window,
-        "crystalSet/GetWindowSizeLimits min=320x240 max=1024x768",
-        320,
-        240,
-        1024,
-        768
+        "crystalSet/GetWindowSizeLimits finite min/max based on current size",
+        minWidth,
+        minHeight,
+        maxWidth,
+        maxHeight
     );
 
     testSizeAfterLimits(
         window,
         "crystalSetWindowSize clamps below finite minimum",
-        100,
-        100,
-        320,
-        240
+        halfWidth,
+        halfHeight,
+        minWidth,
+        minHeight
     );
 
     testSizeAfterLimits(
         window,
-        "crystalSetWindowSize allows size inside finite limits",
-        640,
-        480,
-        640,
-        480
+        "crystalSetWindowSize allows original size inside finite limits",
+        baseWidth,
+        baseHeight,
+        baseWidth,
+        baseHeight
     );
 
     testSizeAfterLimits(
         window,
         "crystalSetWindowSize clamps above finite maximum",
-        1200,
-        900,
-        1024,
-        768
+        largeWidth,
+        largeHeight,
+        maxWidth,
+        maxHeight
     );
 
     testSizeLimits(
         window,
-        "crystalSet/GetWindowSizeLimits min=400x300 max=none",
-        400,
-        300,
+        "crystalSet/GetWindowSizeLimits min-only based on current size",
+        minWidth,
+        minHeight,
         0,
         0
     );
@@ -301,46 +425,46 @@ int main() {
     testSizeAfterLimits(
         window,
         "crystalSetWindowSize clamps below min-only limits",
-        200,
-        100,
-        400,
-        300
+        halfWidth,
+        halfHeight,
+        minWidth,
+        minHeight
     );
 
     testSizeAfterLimits(
         window,
-        "crystalSetWindowSize allows large size with no maximum",
-        900,
-        700,
-        900,
-        700
+        "crystalSetWindowSize allows larger size with no maximum",
+        maxWidth,
+        maxHeight,
+        maxWidth,
+        maxHeight
     );
 
     testSizeLimits(
         window,
-        "crystalSet/GetWindowSizeLimits min=none max=800x600",
+        "crystalSet/GetWindowSizeLimits max-only based on current size",
         0,
         0,
-        800,
-        600
+        maxWidth,
+        maxHeight
     );
 
     testSizeAfterLimits(
         window,
-        "crystalSetWindowSize allows small size with no minimum",
-        200,
-        150,
-        200,
-        150
+        "crystalSetWindowSize allows smaller size with no minimum",
+        halfWidth,
+        halfHeight,
+        halfWidth,
+        halfHeight
     );
 
     testSizeAfterLimits(
         window,
         "crystalSetWindowSize clamps above max-only limits",
-        1000,
-        700,
-        800,
-        600
+        largeWidth,
+        largeHeight,
+        maxWidth,
+        maxHeight
     );
 
     testSizeLimits(
@@ -354,20 +478,29 @@ int main() {
 
     testSizeAfterLimits(
         window,
-        "crystalSetWindowSize allows normal size with no limits",
-        640,
-        480,
-        640,
-        480
+        "crystalSetWindowSize allows original size with no limits",
+        baseWidth,
+        baseHeight,
+        baseWidth,
+        baseHeight
+    );
+
+    testSizeAfterLimits(
+        window,
+        "crystalSetWindowSize allows smaller size with no limits",
+        halfWidth,
+        halfHeight,
+        halfWidth,
+        halfHeight
     );
 
     testSizeAfterLimits(
         window,
         "crystalSetWindowSize allows larger size with no limits",
-        900,
-        700,
-        900,
-        700
+        maxWidth,
+        maxHeight,
+        maxWidth,
+        maxHeight
     );
 
     crystalDestroyWindow(window, &result);
