@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 4.3.0)
 project(CATLIB C CXX)
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 include_directories("${CMAKE_SOURCE_DIR}/include")
 include(${CMAKE_SOURCE_DIR}/CMakeInit.cmake REQUIRED)
 metadata("CATLIB" 1 0 0 "alpha.1" "Libraries, frameworks, and official utilities based on the CatalystUI Model written in C and C++.")
@@ -103,6 +104,8 @@ if(EXISTS "${CMAKE_SOURCE_DIR}/test")
             endif()
             configure_target(
                 NAME ${TEST_NAME}
+                FOLDER "test"
+                SUBDIR "test/"
                 TARGETS ${TEST_NAME}
                 DEPENDS
                     CATMMLIB_STATIC

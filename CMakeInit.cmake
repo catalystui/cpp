@@ -55,7 +55,7 @@ function(configure target_vendor target_system target_architecture)
     endif()
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIRECTORY}" PARENT_SCOPE)
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${OUTPUT_DIRECTORY}" PARENT_SCOPE)
-    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${OUTPUT_DIRECTORY}" PARENT_SCOPE)
+    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${OUTPUT_DIRECTORY}/lib" PARENT_SCOPE)
 
     set(CMAKE_SHARED_LIBRARY_PREFIX "" PARENT_SCOPE)
     set(CMAKE_STATIC_LIBRARY_PREFIX "" PARENT_SCOPE)
@@ -116,13 +116,48 @@ function(configure target_vendor target_system target_architecture)
 endfunction()
 
 function(configure_target)
-    cmake_parse_arguments(ARG "" "NAME" "TARGETS;SOURCES;DEPENDS" ${ARGN})
-
+    cmake_parse_arguments(ARG "" "NAME;FOLDER;SUBDIR" "TARGETS;SOURCES;DEPENDS" ${ARGN})
+    set(ARG_SUBDIR_LOWER "")
+    if(NOT "${ARG_SUBDIR}" STREQUAL "")
+        string(TOLOWER "${ARG_SUBDIR}" ARG_SUBDIR_LOWER)
+    endif()
     foreach(TARGET_NAME ${ARG_TARGETS})
         if(NOT "${ARG_NAME}" STREQUAL "")
             set_target_properties(${TARGET_NAME} PROPERTIES
                 OUTPUT_NAME "${ARG_NAME}"
             )
+        endif()
+        if(NOT "${ARG_FOLDER}" STREQUAL "")
+            set_target_properties(${TARGET_NAME} PROPERTIES
+                FOLDER "${ARG_FOLDER}"
+            )
+        endif()
+        get_target_property(CONFIGURE_TARGET_TYPE ${TARGET_NAME} TYPE)
+        if(NOT "${ARG_SUBDIR_LOWER}" STREQUAL "")
+            if(CONFIGURE_TARGET_TYPE STREQUAL "EXECUTABLE")
+                set_target_properties(${TARGET_NAME} PROPERTIES
+                    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${ARG_SUBDIR_LOWER}"
+                )
+            elseif(CONFIGURE_TARGET_TYPE STREQUAL "STATIC_LIBRARY")
+                set_target_properties(${TARGET_NAME} PROPERTIES
+                    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/${ARG_SUBDIR_LOWER}"
+                )
+            elseif(CONFIGURE_TARGET_TYPE STREQUAL "SHARED_LIBRARY")
+                if(WIN32)
+                    set_target_properties(${TARGET_NAME} PROPERTIES
+                        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${ARG_SUBDIR_LOWER}"
+                        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/${ARG_SUBDIR_LOWER}"
+                    )
+                else()
+                    set_target_properties(${TARGET_NAME} PROPERTIES
+                        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${ARG_SUBDIR_LOWER}"
+                    )
+                endif()
+            elseif(CONFIGURE_TARGET_TYPE STREQUAL "MODULE_LIBRARY")
+                set_target_properties(${TARGET_NAME} PROPERTIES
+                    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${ARG_SUBDIR_LOWER}"
+                )
+            endif()
         endif()
 
         if(ARG_SOURCES)
@@ -133,11 +168,25 @@ function(configure_target)
             target_link_libraries(${TARGET_NAME} PRIVATE ${ARG_DEPENDS})
         endif()
     endforeach()
+
+    # Report configuration details
+    set(CONFIGURE_TARGET_MESSAGE "Configured target(s) ${ARG_TARGETS}")
     if(NOT "${ARG_NAME}" STREQUAL "")
-        message(STATUS "Configured target(s) ${ARG_TARGETS} with output name '${ARG_NAME}', sources: ${ARG_SOURCES}, dependencies: ${ARG_DEPENDS}")
-    else()
-        message(STATUS "Configured target(s) ${ARG_TARGETS} with sources: ${ARG_SOURCES}, dependencies: ${ARG_DEPENDS}")
+        set(CONFIGURE_TARGET_MESSAGE "${CONFIGURE_TARGET_MESSAGE} with output name '${ARG_NAME}'")
     endif()
+    if(NOT "${ARG_FOLDER}" STREQUAL "")
+        set(CONFIGURE_TARGET_MESSAGE "${CONFIGURE_TARGET_MESSAGE}, folder '${ARG_FOLDER}'")
+    endif()
+    if(NOT "${ARG_SUBDIR_LOWER}" STREQUAL "")
+        set(CONFIGURE_TARGET_MESSAGE "${CONFIGURE_TARGET_MESSAGE}, output subdir '${ARG_SUBDIR_LOWER}'")
+    endif()
+    if(ARG_SOURCES)
+        set(CONFIGURE_TARGET_MESSAGE "${CONFIGURE_TARGET_MESSAGE}, sources: ${ARG_SOURCES}")
+    endif()
+    if(ARG_DEPENDS)
+        set(CONFIGURE_TARGET_MESSAGE "${CONFIGURE_TARGET_MESSAGE}, dependencies: ${ARG_DEPENDS}")
+    endif()
+    message(STATUS "${CONFIGURE_TARGET_MESSAGE}")
 endfunction()
 
 function(define config_file_name config_header_name)
