@@ -898,6 +898,30 @@ extern "C" void crystalGetWindowState(CRYSTALwindow* window, CRYSTAL_PROPERTIES_
     }
 }
 
+extern "C" void crystalCloseWindow(CRYSTALwindow* window, catalyst::RESULT* result) {
+    @autoreleasepool {
+        if (window == 0) {
+            if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
+            return;
+        }
+        if (window->native.primary == 0) {
+            if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_STATE, 0, 0, 0);
+            return;
+        }
+
+        // Allow the close request to be canceled
+        if (window->closingCallback != 0) {
+            if (!window->closingCallback(window)) {
+                if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_SUCCESS_NOOP, 0, 0, 0);
+                return;
+            }
+        }
+
+        // Close accepted, so destroy the window
+        crystalDestroyWindow(window, result);
+    }
+}
+
 extern "C" void crystalDestroyWindow(CRYSTALwindow* window, catalyst::RESULT* result) {
     @autoreleasepool {
         if (window == 0) {

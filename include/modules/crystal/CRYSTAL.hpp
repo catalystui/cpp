@@ -113,6 +113,10 @@ inline void getWindowState(window* window, CRYSTAL_PROPERTIES_STATE* state) {
     ::crystalGetWindowState(window, state);
 }
 
+inline void closeWindow(window* window, RESULT* result) {
+    ::crystalCloseWindow(window, result);
+}
+
 inline void destroyWindow(window* window, RESULT* result) {
     ::crystalDestroyWindow(window, result);
 }

@@ -75,6 +75,7 @@ CRYSTAL_API void crystalRestoreWindow(CRYSTALwindow* window, CATALYST_RESULT* re
 CRYSTAL_API void crystalShowWindow(CRYSTALwindow* window, CATALYST_RESULT* result);
 CRYSTAL_API void crystalHideWindow(CRYSTALwindow* window, CATALYST_RESULT* result);
 CRYSTAL_API void crystalGetWindowState(CRYSTALwindow* window, CRYSTAL_PROPERTIES_STATE* state);
+CRYSTAL_API void crystalCloseWindow(CRYSTALwindow* window, CATALYST_RESULT* result);
 CRYSTAL_API void crystalDestroyWindow(CRYSTALwindow* window, CATALYST_RESULT* result);
 CRYSTAL_API void crystalSetWindowClosingCallback(CRYSTALwindow* window, CRYSTALwindowClosingCallback callback);
 
