@@ -27,6 +27,18 @@ static const CRYSTAL_PROPERTIES_STATE PROPERTIES_STATE_MAXIMIZED = CRYSTAL_PROPE
 static const CRYSTAL_PROPERTIES_STATE PROPERTIES_STATE_VISIBLE = CRYSTAL_PROPERTIES_STATE_VISIBLE;
 static const CRYSTAL_PROPERTIES_STATE PROPERTIES_STATE_HIDDEN = CRYSTAL_PROPERTIES_STATE_HIDDEN;
 
+typedef ::CRYSTALwindowErroredCallback windowErroredCallback;
+typedef ::CRYSTALwindowRepositionedCallback windowRepositionedCallback;
+typedef ::CRYSTALwindowResizedCallback windowResizedCallback;
+typedef ::CRYSTALwindowRefreshCallback windowRefreshCallback;
+typedef ::CRYSTALwindowRedrawCallback windowRedrawCallback;
+typedef ::CRYSTALwindowFocusedCallback windowFocusedCallback;
+typedef ::CRYSTALwindowUnfocusedCallback windowUnfocusedCallback;
+typedef ::CRYSTALwindowMinimizedCallback windowMinimizedCallback;
+typedef ::CRYSTALwindowMaximizedCallback windowMaximizedCallback;
+typedef ::CRYSTALwindowRestoredCallback windowRestoredCallback;
+typedef ::CRYSTALwindowShownCallback windowShownCallback;
+typedef ::CRYSTALwindowHiddenCallback windowHiddenCallback;
 typedef ::CRYSTALwindowClosingCallback windowClosingCallback;
 
 inline window* createWindow(RESULT* result) {
@@ -119,6 +131,54 @@ inline void closeWindow(window* window, RESULT* result) {
 
 inline void destroyWindow(window* window, RESULT* result) {
     ::crystalDestroyWindow(window, result);
+}
+
+inline void setWindowErroredCallback(window* window, windowErroredCallback callback) {
+    ::crystalSetWindowErroredCallback(window, callback);
+}
+
+inline void setWindowRepositionedCallback(window* window, windowRepositionedCallback callback) {
+    ::crystalSetWindowRepositionedCallback(window, callback);
+}
+
+inline void setWindowResizedCallback(window* window, windowResizedCallback callback) {
+    ::crystalSetWindowResizedCallback(window, callback);
+}
+
+inline void setWindowRefreshCallback(window* window, windowRefreshCallback callback) {
+    ::crystalSetWindowRefreshCallback(window, callback);
+}
+
+inline void setWindowRedrawCallback(window* window, windowRedrawCallback callback) {
+    ::crystalSetWindowRedrawCallback(window, callback);
+}
+
+inline void setWindowFocusedCallback(window* window, windowFocusedCallback callback) {
+    ::crystalSetWindowFocusedCallback(window, callback);
+}
+
+inline void setWindowUnfocusedCallback(window* window, windowUnfocusedCallback callback) {
+    ::crystalSetWindowUnfocusedCallback(window, callback);
+}
+
+inline void setWindowMinimizedCallback(window* window, windowMinimizedCallback callback) {
+    ::crystalSetWindowMinimizedCallback(window, callback);
+}
+
+inline void setWindowMaximizedCallback(window* window, windowMaximizedCallback callback) {
+    ::crystalSetWindowMaximizedCallback(window, callback);
+}
+
+inline void setWindowRestoredCallback(window* window, windowRestoredCallback callback) {
+    ::crystalSetWindowRestoredCallback(window, callback);
+}
+
+inline void setWindowShownCallback(window* window, windowShownCallback callback) {
+    ::crystalSetWindowShownCallback(window, callback);
+}
+
+inline void setWindowHiddenCallback(window* window, windowHiddenCallback callback) {
+    ::crystalSetWindowHiddenCallback(window, callback);
 }
 
 inline void setWindowClosingCallback(window* window, windowClosingCallback callback) {

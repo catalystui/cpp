@@ -12,9 +12,28 @@
     #define __has_feature(x) 0
 #endif
 
+@interface CrystalContentView : NSView {
+@public
+    CRYSTALwindow* crystalWindow;
+}
+@end
+
+@implementation CrystalContentView
+
+- (void) drawRect: (NSRect) dirtyRect {
+    [super drawRect:dirtyRect];
+
+    if (crystalWindow != 0 && crystalWindow->redrawCallback != 0) {
+        crystalWindow->redrawCallback(crystalWindow);
+    }
+}
+
+@end
+
 @interface CrystalWindowDelegate : NSObject<NSWindowDelegate> {
 @public
     CRYSTALwindow* window;
+    BOOL wasZoomed;
 }
 @end
 
@@ -25,6 +44,136 @@
         return window->closingCallback(window) ? YES : NO;
     }
     return YES;
+}
+
+- (void) windowDidMove: (NSNotification*) notification {
+    if (window == 0) {
+        return;
+    }
+
+    NSWindow* nsWindow = (NSWindow*) [notification object];
+    if (nsWindow == nil) {
+        return;
+    }
+
+    NSScreen* nsScreen = [nsWindow screen];
+    if (nsScreen == nil) {
+        nsScreen = [NSScreen mainScreen];
+    }
+    if (nsScreen == nil) {
+        return;
+    }
+
+    NSRect nsWindowFrame = [nsWindow frame];
+    NSRect nsScreenFrame = [nsScreen frame];
+    CGFloat nsTop = NSMaxY(nsScreenFrame);
+
+    catalyst::NUINT x = (catalyst::NUINT) nsWindowFrame.origin.x;
+    catalyst::NUINT y = (catalyst::NUINT) (nsTop - NSMaxY(nsWindowFrame));
+
+    if (window->repositionedCallback != 0) {
+        window->repositionedCallback(window, x, y);
+    }
+
+    if (window->refreshCallback != 0) {
+        window->refreshCallback(window);
+    }
+}
+
+- (void) windowDidResize: (NSNotification*) notification {
+    if (window == 0) {
+        return;
+    }
+
+    NSWindow* nsWindow = (NSWindow*) [notification object];
+    if (nsWindow == nil) {
+        return;
+    }
+
+    NSRect nsContent = [nsWindow contentRectForFrameRect:[nsWindow frame]];
+
+    if (window->resizedCallback != 0) {
+        window->resizedCallback(
+            window,
+            (catalyst::NUINT) nsContent.size.width,
+            (catalyst::NUINT) nsContent.size.height
+        );
+    }
+
+    BOOL isZoomed = [nsWindow isZoomed] ? YES : NO;
+
+    if (isZoomed && !wasZoomed) {
+        if (window->maximizedCallback != 0) {
+            window->maximizedCallback(window);
+        }
+    }
+    else if (!isZoomed && wasZoomed) {
+        if (window->restoredCallback != 0) {
+            window->restoredCallback(window);
+        }
+    }
+
+    wasZoomed = isZoomed;
+
+    if (window->refreshCallback != 0) {
+        window->refreshCallback(window);
+    }
+
+    if (window->redrawCallback != 0) {
+        window->redrawCallback(window);
+    }
+}
+
+- (void) windowDidExpose: (NSNotification*) notification {
+    if (window != 0 && window->refreshCallback != 0) {
+        window->refreshCallback(window);
+    }
+}
+
+- (void) windowDidUpdate: (NSNotification*) notification {
+    if (window != 0 && window->refreshCallback != 0) {
+        window->refreshCallback(window);
+    }
+}
+
+- (void) windowDidBecomeKey: (NSNotification*) notification {
+    if (window != 0 && window->focusedCallback != 0) {
+        window->focusedCallback(window);
+    }
+
+    if (window != 0 && window->refreshCallback != 0) {
+        window->refreshCallback(window);
+    }
+}
+
+- (void) windowDidResignKey: (NSNotification*) notification {
+    if (window != 0 && window->unfocusedCallback != 0) {
+        window->unfocusedCallback(window);
+    }
+
+    if (window != 0 && window->refreshCallback != 0) {
+        window->refreshCallback(window);
+    }
+}
+
+- (void) windowDidMiniaturize: (NSNotification*) notification {
+    if (window != 0 && window->minimizedCallback != 0) {
+        window->minimizedCallback(window);
+    }
+
+    if (window != 0 && window->refreshCallback != 0) {
+        window->refreshCallback(window);
+    }
+}
+
+- (void) windowDidDeminiaturize: (NSNotification*) notification {
+    if (window != 0 && window->restoredCallback != 0) {
+        window->restoredCallback(window);
+    }
+
+    if (window != 0 && window->refreshCallback != 0) {
+        window->refreshCallback(window);
+    }
 }
 
 @end
@@ -46,6 +195,18 @@ extern "C" CRYSTALwindow* crystalCreateWindow(catalyst::RESULT* result) {
         window->native.secondary = 0;
         window->native.tertiary = 0;
         window->platform = 0;
+        window->erroredCallback = 0;
+        window->repositionedCallback = 0;
+        window->resizedCallback = 0;
+        window->refreshCallback = 0;
+        window->redrawCallback = 0;
+        window->focusedCallback = 0;
+        window->unfocusedCallback = 0;
+        window->minimizedCallback = 0;
+        window->maximizedCallback = 0;
+        window->restoredCallback = 0;
+        window->shownCallback = 0;
+        window->hiddenCallback = 0;
         window->closingCallback = 0;
 
         // Create the application
@@ -71,7 +232,7 @@ extern "C" CRYSTALwindow* crystalCreateWindow(catalyst::RESULT* result) {
         }
 
         // Create the content view
-        NSView* nsView = [[NSView alloc] initWithFrame:nsRect];
+        CrystalContentView* nsView = [[CrystalContentView alloc] initWithFrame:nsRect];
         if (nsView == nil) {
 #if !__has_feature(objc_arc)
             [nsWindow release];
@@ -80,6 +241,7 @@ extern "C" CRYSTALwindow* crystalCreateWindow(catalyst::RESULT* result) {
             if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_DEPENDENCY_FAILURE, 0, 2, 0);
             return 0;
         }
+        nsView->crystalWindow = window;
         [nsWindow setContentView:nsView];
 #if !__has_feature(objc_arc)
         [nsView release];
@@ -97,6 +259,7 @@ extern "C" CRYSTALwindow* crystalCreateWindow(catalyst::RESULT* result) {
             return 0;
         }
         delegate->window = window;
+        delegate->wasZoomed = [nsWindow isZoomed] ? YES : NO;
 
         // Configure and show the window
         [nsWindow setReleasedWhenClosed:NO];
@@ -809,17 +972,22 @@ extern "C" void crystalShowWindow(CRYSTALwindow* window, catalyst::RESULT* resul
             return;
         }
 
-        // Get the NSWindow reference
 #if __has_feature(objc_arc)
         NSWindow* nsWindow = (__bridge NSWindow*) (void*) window->native.primary;
 #else
         NSWindow* nsWindow = (NSWindow*) (void*) window->native.primary;
 #endif
 
-        // Show the window without requesting focus
         [nsWindow orderFront:nil];
 
-        // Report success
+        if (window->shownCallback != 0) {
+            window->shownCallback(window);
+        }
+
+        if (window->refreshCallback != 0) {
+            window->refreshCallback(window);
+        }
+
         if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_SUCCESS, 0, 0, 0);
     }
 }
@@ -835,17 +1003,22 @@ extern "C" void crystalHideWindow(CRYSTALwindow* window, catalyst::RESULT* resul
             return;
         }
 
-        // Get the NSWindow reference
 #if __has_feature(objc_arc)
         NSWindow* nsWindow = (__bridge NSWindow*) (void*) window->native.primary;
 #else
         NSWindow* nsWindow = (NSWindow*) (void*) window->native.primary;
 #endif
 
-        // Hide the window without minimizing it
         [nsWindow orderOut:nil];
 
-        // Report success
+        if (window->hiddenCallback != 0) {
+            window->hiddenCallback(window);
+        }
+
+        if (window->refreshCallback != 0) {
+            window->refreshCallback(window);
+        }
+
         if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_SUCCESS, 0, 0, 0);
     }
 }
@@ -985,6 +1158,18 @@ extern "C" void crystalDestroyWindow(CRYSTALwindow* window, catalyst::RESULT* re
         }
 
         // Deconfigure callbacks
+        window->erroredCallback = 0;
+        window->repositionedCallback = 0;
+        window->resizedCallback = 0;
+        window->refreshCallback = 0;
+        window->redrawCallback = 0;
+        window->focusedCallback = 0;
+        window->unfocusedCallback = 0;
+        window->minimizedCallback = 0;
+        window->maximizedCallback = 0;
+        window->restoredCallback = 0;
+        window->shownCallback = 0;
+        window->hiddenCallback = 0;
         window->closingCallback = 0;
 
         // Free the window object
