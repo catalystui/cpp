@@ -2,8 +2,7 @@
 #include "modules/crystal/CRYSTAL.h"
 
 #include <stdio.h>
-#include <chrono>
-#include <thread>
+#include <time.h>
 
 struct AppState {
     int running;
@@ -34,7 +33,29 @@ static void fail(const char* name, CATALYST_RESULT result) {
 }
 
 static void sleepMillis(int milliseconds) {
-    std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
+    clock_t start;
+    clock_t elapsed;
+    clock_t wait;
+
+    if (milliseconds <= 0) {
+        return;
+    }
+
+    wait = (clock_t) (((double) milliseconds * (double) CLOCKS_PER_SEC) / 1000.0);
+
+    if (wait <= 0) {
+        wait = 1;
+    }
+
+    start = clock();
+
+    if (start == (clock_t) -1) {
+        return;
+    }
+
+    do {
+        elapsed = clock() - start;
+    } while (elapsed < wait);
 }
 
 static void waitForEnter(const char* message) {
@@ -150,7 +171,7 @@ static void testStyleIncludes(
     printStyle("  requested", requested);
     printStyle("  actual   ", actual);
 
-    countdownInspect(5);
+    countdownInspect(3);
 }
 
 static void testStyleExact(

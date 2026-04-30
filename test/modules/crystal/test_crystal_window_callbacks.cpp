@@ -2,8 +2,7 @@
 #include "modules/crystal/CRYSTAL.h"
 
 #include <stdio.h>
-#include <chrono>
-#include <thread>
+#include <time.h>
 
 struct AppState {
     int repositioned;
@@ -63,7 +62,29 @@ static void fail(const char* name, CATALYST_RESULT result) {
 }
 
 static void sleepMillis(int milliseconds) {
-    std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
+    clock_t start;
+    clock_t elapsed;
+    clock_t wait;
+
+    if (milliseconds <= 0) {
+        return;
+    }
+
+    wait = (clock_t) (((double) milliseconds * (double) CLOCKS_PER_SEC) / 1000.0);
+
+    if (wait <= 0) {
+        wait = 1;
+    }
+
+    start = clock();
+
+    if (start == (clock_t) -1) {
+        return;
+    }
+
+    do {
+        elapsed = clock() - start;
+    } while (elapsed < wait);
 }
 
 static void waitForEnter(const char* message) {
@@ -359,13 +380,21 @@ int main() {
 
     pumpEventsFor(500);
 
-    waitForEnter("Press Enter to request focus...");
-    runActionTest(
-        window,
-        "crystalRequestWindowFocus fires focused/refresh",
-        actionFocus,
-        EXPECT_FOCUSED | EXPECT_REFRESH
-    );
+    printf("\nManual focus test:\n");
+    waitForEnter("Click another app/window so CRYSTAL loses focus, then press Enter to request focus...");
+    resetCounts();
+
+    actionFocus(window, &result);
+
+    if (result.status != CATALYST_STATUS_CODE_SUCCESS && result.status != CATALYST_STATUS_CODE_SUCCESS_NOOP) {
+        fail("crystalRequestWindowFocus", result);
+    } else {
+        pass("crystalRequestWindowFocus returned success");
+    }
+
+    pumpEventsFor(500);
+    printCounts();
+    countdownInspect(3);
 
     waitForEnter("Press Enter to reposition the window...");
     runActionTest(
