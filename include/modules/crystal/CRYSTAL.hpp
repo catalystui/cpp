@@ -6,8 +6,26 @@ namespace catalyst {
 namespace modules {
 namespace crystal {
 
-typedef ::CRYSTALnative native;
 typedef ::CRYSTALwindow window;
+typedef ::CRYSTALnative native;
+
+typedef ::CRYSTAL_PROPERTIES_STYLE PROPERTIES_STYLE;
+
+static const CRYSTAL_PROPERTIES_STYLE PROPERTIES_STYLE_NONE = CRYSTAL_PROPERTIES_STYLE_NONE;
+static const CRYSTAL_PROPERTIES_STYLE PROPERTIES_STYLE_DECORATED = CRYSTAL_PROPERTIES_STYLE_DECORATED;
+static const CRYSTAL_PROPERTIES_STYLE PROPERTIES_STYLE_MINIMIZABLE = CRYSTAL_PROPERTIES_STYLE_MINIMIZABLE;
+static const CRYSTAL_PROPERTIES_STYLE PROPERTIES_STYLE_MAXIMIZABLE = CRYSTAL_PROPERTIES_STYLE_MAXIMIZABLE;
+static const CRYSTAL_PROPERTIES_STYLE PROPERTIES_STYLE_RESIZABLE = CRYSTAL_PROPERTIES_STYLE_RESIZABLE;
+
+typedef ::CRYSTAL_PROPERTIES_STATE PROPERTIES_STATE;
+
+static const CRYSTAL_PROPERTIES_STATE PROPERTIES_STATE_NONE = CRYSTAL_PROPERTIES_STATE_NONE;
+static const CRYSTAL_PROPERTIES_STATE PROPERTIES_STATE_FOCUSED = CRYSTAL_PROPERTIES_STATE_FOCUSED;
+static const CRYSTAL_PROPERTIES_STATE PROPERTIES_STATE_UNFOCUSED = CRYSTAL_PROPERTIES_STATE_UNFOCUSED;
+static const CRYSTAL_PROPERTIES_STATE PROPERTIES_STATE_MINIMIZED = CRYSTAL_PROPERTIES_STATE_MINIMIZED;
+static const CRYSTAL_PROPERTIES_STATE PROPERTIES_STATE_MAXIMIZED = CRYSTAL_PROPERTIES_STATE_MAXIMIZED;
+static const CRYSTAL_PROPERTIES_STATE PROPERTIES_STATE_VISIBLE = CRYSTAL_PROPERTIES_STATE_VISIBLE;
+static const CRYSTAL_PROPERTIES_STATE PROPERTIES_STATE_HIDDEN = CRYSTAL_PROPERTIES_STATE_HIDDEN;
 
 typedef ::CRYSTALwindowClosingCallback windowClosingCallback;
 
@@ -55,8 +73,44 @@ inline void getWindowSizeLimits(window* window, NUINT* minWidth, NUINT* minHeigh
     ::crystalGetWindowSizeLimits(window, minWidth, minHeight, maxWidth, maxHeight, result);
 }
 
-inline void closeWindow(window* window, RESULT* result) {
-    ::crystalCloseWindow(window, result);
+inline void setWindowStyle(window* window, CRYSTAL_PROPERTIES_STYLE style, RESULT* result) {
+    ::crystalSetWindowStyle(window, style, result);
+}
+
+inline void getWindowStyle(window* window, CRYSTAL_PROPERTIES_STYLE* style, RESULT* result) {
+    ::crystalGetWindowStyle(window, style, result);
+}
+
+inline void requestWindowFocus(window* window, RESULT* result) {
+    ::crystalRequestWindowFocus(window, result);
+}
+
+inline void requestWindowAttention(window* window, RESULT* result) {
+    ::crystalRequestWindowAttention(window, result);
+}
+
+inline void minimizeWindow(window* window, RESULT* result) {
+    ::crystalMinimizeWindow(window, result);
+}
+
+inline void maximizeWindow(window* window, RESULT* result) {
+    ::crystalMaximizeWindow(window, result);
+}
+
+inline void restoreWindow(window* window, RESULT* result) {
+    ::crystalRestoreWindow(window, result);
+}
+
+inline void showWindow(window* window, RESULT* result) {
+    ::crystalShowWindow(window, result);
+}
+
+inline void hideWindow(window* window, RESULT* result) {
+    ::crystalHideWindow(window, result);
+}
+
+inline void getWindowState(window* window, CRYSTAL_PROPERTIES_STATE* state) {
+    ::crystalGetWindowState(window, state);
 }
 
 inline void destroyWindow(window* window, RESULT* result) {

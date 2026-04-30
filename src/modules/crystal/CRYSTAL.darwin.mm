@@ -540,6 +540,364 @@ extern "C" void crystalGetWindowSizeLimits(CRYSTALwindow* window, catalyst::NUIN
     }
 }
 
+extern "C" void crystalSetWindowStyle(CRYSTALwindow* window, CRYSTAL_PROPERTIES_STYLE style, catalyst::RESULT* result) {
+    @autoreleasepool {
+        if (window == 0) {
+            if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
+            return;
+        }
+        if ((style & ~(
+            CRYSTAL_PROPERTIES_STYLE_DECORATED |
+            CRYSTAL_PROPERTIES_STYLE_MINIMIZABLE |
+            CRYSTAL_PROPERTIES_STYLE_MAXIMIZABLE |
+            CRYSTAL_PROPERTIES_STYLE_RESIZABLE
+        )) != 0) {
+            if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 1);
+            return;
+        }
+        if (window->native.primary == 0) {
+            if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_STATE, 0, 0, 0);
+            return;
+        }
+
+        // On Darwin, the zoom/maximize behavior is tied to resize behavior.
+        if ((style & CRYSTAL_PROPERTIES_STYLE_MAXIMIZABLE) != 0) {
+            style = (CRYSTAL_PROPERTIES_STYLE) (style | CRYSTAL_PROPERTIES_STYLE_RESIZABLE);
+        }
+        if ((style & CRYSTAL_PROPERTIES_STYLE_RESIZABLE) != 0) {
+            style = (CRYSTAL_PROPERTIES_STYLE) (style | CRYSTAL_PROPERTIES_STYLE_MAXIMIZABLE);
+        }
+
+        // Get the NSWindow reference
+#if __has_feature(objc_arc)
+        NSWindow* nsWindow = (__bridge NSWindow*) (void*) window->native.primary;
+#else
+        NSWindow* nsWindow = (NSWindow*) (void*) window->native.primary;
+#endif
+
+        // Preserve the content rectangle while changing the window style
+        NSRect nsContent = [nsWindow contentRectForFrameRect:[nsWindow frame]];
+
+        NSUInteger nsStyleMask = 0;
+
+        if ((style & CRYSTAL_PROPERTIES_STYLE_DECORATED) != 0) {
+            nsStyleMask |= NSWindowStyleMaskTitled;
+            nsStyleMask |= NSWindowStyleMaskClosable;
+        }
+        if ((style & CRYSTAL_PROPERTIES_STYLE_MINIMIZABLE) != 0) {
+            nsStyleMask |= NSWindowStyleMaskMiniaturizable;
+        }
+        if ((style & CRYSTAL_PROPERTIES_STYLE_RESIZABLE) != 0) {
+            nsStyleMask |= NSWindowStyleMaskResizable;
+        }
+
+        [nsWindow setStyleMask:nsStyleMask];
+
+        // Cocoa has no independent maximize style bit.
+        // The zoom button only exists meaningfully on decorated windows.
+        NSButton* nsZoomButton = [nsWindow standardWindowButton:NSWindowZoomButton];
+        if (nsZoomButton != nil) {
+            [nsZoomButton setEnabled:((style & CRYSTAL_PROPERTIES_STYLE_MAXIMIZABLE) != 0) ? YES : NO];
+        }
+
+        // Re-apply the frame so the content area remains stable
+        NSRect nsFrame = [nsWindow frameRectForContentRect:nsContent];
+        [nsWindow setFrame:nsFrame display:YES];
+
+        // Report success
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_SUCCESS, 0, 0, 0);
+    }
+}
+
+extern "C" void crystalGetWindowStyle(CRYSTALwindow* window, CRYSTAL_PROPERTIES_STYLE* style, catalyst::RESULT* result) {
+    @autoreleasepool {
+        if (window == 0) {
+            if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
+            return;
+        }
+        if (style == 0) {
+            if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 1);
+            return;
+        }
+        *style = CRYSTAL_PROPERTIES_STYLE_NONE;
+        if (window->native.primary == 0) {
+            if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_STATE, 0, 0, 0);
+            return;
+        }
+
+        // Get the NSWindow reference
+#if __has_feature(objc_arc)
+        NSWindow* nsWindow = (__bridge NSWindow*) (void*) window->native.primary;
+#else
+        NSWindow* nsWindow = (NSWindow*) (void*) window->native.primary;
+#endif
+
+        // Convert Cocoa style mask into Catalyst style flags
+        NSUInteger nsStyleMask = [nsWindow styleMask];
+
+        if ((nsStyleMask & NSWindowStyleMaskTitled) != 0) {
+            *style = (CRYSTAL_PROPERTIES_STYLE) (*style | CRYSTAL_PROPERTIES_STYLE_DECORATED);
+        }
+        if ((nsStyleMask & NSWindowStyleMaskMiniaturizable) != 0) {
+            *style = (CRYSTAL_PROPERTIES_STYLE) (*style | CRYSTAL_PROPERTIES_STYLE_MINIMIZABLE);
+        }
+        if ((nsStyleMask & NSWindowStyleMaskResizable) != 0) {
+            *style = (CRYSTAL_PROPERTIES_STYLE) (*style | CRYSTAL_PROPERTIES_STYLE_RESIZABLE);
+            *style = (CRYSTAL_PROPERTIES_STYLE) (*style | CRYSTAL_PROPERTIES_STYLE_MAXIMIZABLE);
+        }
+
+        // If Cocoa exposes an enabled zoom button, report both because Darwin ties these together.
+        NSButton* nsZoomButton = [nsWindow standardWindowButton:NSWindowZoomButton];
+        if (nsZoomButton != nil && [nsZoomButton isEnabled]) {
+            *style = (CRYSTAL_PROPERTIES_STYLE) (*style | CRYSTAL_PROPERTIES_STYLE_MAXIMIZABLE);
+            *style = (CRYSTAL_PROPERTIES_STYLE) (*style | CRYSTAL_PROPERTIES_STYLE_RESIZABLE);
+        }
+
+        // Report success
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_SUCCESS, 0, 0, 0);
+    }
+}
+
+extern "C" void crystalRequestWindowFocus(CRYSTALwindow* window, catalyst::RESULT* result) {
+    @autoreleasepool {
+        if (window == 0) {
+            if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
+            return;
+        }
+        if (window->native.primary == 0) {
+            if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_STATE, 0, 0, 0);
+            return;
+        }
+
+        // Get the NSWindow reference
+#if __has_feature(objc_arc)
+        NSWindow* nsWindow = (__bridge NSWindow*) (void*) window->native.primary;
+#else
+        NSWindow* nsWindow = (NSWindow*) (void*) window->native.primary;
+#endif
+
+        // Request focus
+        NSApplication* nsApplication = [NSApplication sharedApplication];
+        [nsApplication activateIgnoringOtherApps:YES];
+        [nsWindow makeKeyAndOrderFront:nil];
+
+        // Report success
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_SUCCESS, 0, 0, 0);
+    }
+}
+
+extern "C" void crystalRequestWindowAttention(CRYSTALwindow* window, catalyst::RESULT* result) {
+    @autoreleasepool {
+        if (window == 0) {
+            if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
+            return;
+        }
+        if (window->native.primary == 0) {
+            if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_STATE, 0, 0, 0);
+            return;
+        }
+
+        // Request user attention
+        NSApplication* nsApplication = [NSApplication sharedApplication];
+        [nsApplication requestUserAttention:NSInformationalRequest];
+
+        // Report success
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_SUCCESS, 0, 0, 0);
+    }
+}
+
+extern "C" void crystalMinimizeWindow(CRYSTALwindow* window, catalyst::RESULT* result) {
+    @autoreleasepool {
+        if (window == 0) {
+            if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
+            return;
+        }
+        if (window->native.primary == 0) {
+            if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_STATE, 0, 0, 0);
+            return;
+        }
+
+        // Get the NSWindow reference
+#if __has_feature(objc_arc)
+        NSWindow* nsWindow = (__bridge NSWindow*) (void*) window->native.primary;
+#else
+        NSWindow* nsWindow = (NSWindow*) (void*) window->native.primary;
+#endif
+
+        // Minimize the window
+        [nsWindow miniaturize:nil];
+
+        // Report success
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_SUCCESS, 0, 0, 0);
+    }
+}
+
+extern "C" void crystalMaximizeWindow(CRYSTALwindow* window, catalyst::RESULT* result) {
+    @autoreleasepool {
+        if (window == 0) {
+            if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
+            return;
+        }
+        if (window->native.primary == 0) {
+            if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_STATE, 0, 0, 0);
+            return;
+        }
+
+        // Get the NSWindow reference
+#if __has_feature(objc_arc)
+        NSWindow* nsWindow = (__bridge NSWindow*) (void*) window->native.primary;
+#else
+        NSWindow* nsWindow = (NSWindow*) (void*) window->native.primary;
+#endif
+
+        // Restore from minimized state first
+        if ([nsWindow isMiniaturized]) {
+            [nsWindow deminiaturize:nil];
+        }
+
+        // Maximize/zoom the window
+        if (![nsWindow isZoomed]) {
+            [nsWindow zoom:nil];
+        }
+
+        // Report success
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_SUCCESS, 0, 0, 0);
+    }
+}
+
+extern "C" void crystalRestoreWindow(CRYSTALwindow* window, catalyst::RESULT* result) {
+    @autoreleasepool {
+        if (window == 0) {
+            if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
+            return;
+        }
+        if (window->native.primary == 0) {
+            if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_STATE, 0, 0, 0);
+            return;
+        }
+
+        // Get the NSWindow reference
+#if __has_feature(objc_arc)
+        NSWindow* nsWindow = (__bridge NSWindow*) (void*) window->native.primary;
+#else
+        NSWindow* nsWindow = (NSWindow*) (void*) window->native.primary;
+#endif
+
+        // Restore from minimized state
+        if ([nsWindow isMiniaturized]) {
+            [nsWindow deminiaturize:nil];
+        }
+
+        // Restore from maximized/zoomed state
+        if ([nsWindow isZoomed]) {
+            [nsWindow zoom:nil];
+        }
+
+        // Report success
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_SUCCESS, 0, 0, 0);
+    }
+}
+
+extern "C" void crystalShowWindow(CRYSTALwindow* window, catalyst::RESULT* result) {
+    @autoreleasepool {
+        if (window == 0) {
+            if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
+            return;
+        }
+        if (window->native.primary == 0) {
+            if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_STATE, 0, 0, 0);
+            return;
+        }
+
+        // Get the NSWindow reference
+#if __has_feature(objc_arc)
+        NSWindow* nsWindow = (__bridge NSWindow*) (void*) window->native.primary;
+#else
+        NSWindow* nsWindow = (NSWindow*) (void*) window->native.primary;
+#endif
+
+        // Show the window without requesting focus
+        [nsWindow orderFront:nil];
+
+        // Report success
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_SUCCESS, 0, 0, 0);
+    }
+}
+
+extern "C" void crystalHideWindow(CRYSTALwindow* window, catalyst::RESULT* result) {
+    @autoreleasepool {
+        if (window == 0) {
+            if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
+            return;
+        }
+        if (window->native.primary == 0) {
+            if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_STATE, 0, 0, 0);
+            return;
+        }
+
+        // Get the NSWindow reference
+#if __has_feature(objc_arc)
+        NSWindow* nsWindow = (__bridge NSWindow*) (void*) window->native.primary;
+#else
+        NSWindow* nsWindow = (NSWindow*) (void*) window->native.primary;
+#endif
+
+        // Hide the window without minimizing it
+        [nsWindow orderOut:nil];
+
+        // Report success
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_SUCCESS, 0, 0, 0);
+    }
+}
+
+extern "C" void crystalGetWindowState(CRYSTALwindow* window, CRYSTAL_PROPERTIES_STATE* state) {
+    @autoreleasepool {
+        if (state == 0) {
+            return;
+        }
+        *state = CRYSTAL_PROPERTIES_STATE_NONE;
+        if (window == 0) {
+            return;
+        }
+        if (window->native.primary == 0) {
+            return;
+        }
+
+        // Get the NSWindow reference
+#if __has_feature(objc_arc)
+        NSWindow* nsWindow = (__bridge NSWindow*) (void*) window->native.primary;
+#else
+        NSWindow* nsWindow = (NSWindow*) (void*) window->native.primary;
+#endif
+
+        // Focus state
+        if ([nsWindow isKeyWindow]) {
+            *state = (CRYSTAL_PROPERTIES_STATE) (*state | CRYSTAL_PROPERTIES_STATE_FOCUSED);
+        }
+        else {
+            *state = (CRYSTAL_PROPERTIES_STATE) (*state | CRYSTAL_PROPERTIES_STATE_UNFOCUSED);
+        }
+
+        // Minimized state
+        if ([nsWindow isMiniaturized]) {
+            *state = (CRYSTAL_PROPERTIES_STATE) (*state | CRYSTAL_PROPERTIES_STATE_MINIMIZED);
+        }
+
+        // Maximized state
+        if ([nsWindow isZoomed]) {
+            *state = (CRYSTAL_PROPERTIES_STATE) (*state | CRYSTAL_PROPERTIES_STATE_MAXIMIZED);
+        }
+
+        // Visibility state
+        if ([nsWindow isVisible] && ![nsWindow isMiniaturized]) {
+            *state = (CRYSTAL_PROPERTIES_STATE) (*state | CRYSTAL_PROPERTIES_STATE_VISIBLE);
+        }
+        else {
+            *state = (CRYSTAL_PROPERTIES_STATE) (*state | CRYSTAL_PROPERTIES_STATE_HIDDEN);
+        }
+    }
+}
+
 extern "C" void crystalDestroyWindow(CRYSTALwindow* window, catalyst::RESULT* result) {
     @autoreleasepool {
         if (window == 0) {
