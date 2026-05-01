@@ -92,10 +92,20 @@ if(EXISTS "${CMAKE_SOURCE_DIR}/test")
             add_executable(${TEST_NAME}
                 "${TEST_SOURCE}"
             )
-            if(TARGET_PLATFORM_WIN32 AND TEST_NAME STREQUAL "exe")
-                set_target_properties(${TEST_NAME} PROPERTIES
-                    WIN32_EXECUTABLE TRUE
-                )
+            if(TEST_NAME STREQUAL "exe")
+                if(TARGET_PLATFORM_WIN32)
+                    set_target_properties(${TEST_NAME} PROPERTIES
+                        WIN32_EXECUTABLE TRUE
+                    )
+                    message(STATUS "Configured ${TEST_NAME} as a Windows GUI application")
+                elseif(TARGET_PLATFORM_DARWIN)
+                    set_target_properties(${TEST_NAME} PROPERTIES
+                        MACOSX_BUNDLE TRUE
+                        MACOSX_BUNDLE_BUNDLE_NAME "${TEST_NAME}"
+                        MACOSX_BUNDLE_GUI_IDENTIFIER "org.catalystui.${TEST_NAME}"
+                    )
+                    message(STATUS "Configured ${TEST_NAME} as a macOS GUI application")
+                endif()
             endif()
             if(MSVC)
                 target_link_options(${TEST_NAME} PRIVATE
