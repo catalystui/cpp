@@ -77,6 +77,13 @@ function(configure target_vendor target_system target_architecture)
     else()
         set(TARGET_PLATFORM_DARWIN 0 PARENT_SCOPE)
     endif()
+    if(TARGET_VENDOR STREQUAL "linux" AND TARGET_SYSTEM MATCHES "^linux")
+        set(CONFIGURE_FOUND_PLATFORM 1)
+        set(TARGET_PLATFORM_LINUX 1 PARENT_SCOPE)
+        message(STATUS "Identified target platform as Linux based on vendor '${TARGET_VENDOR}' and system '${TARGET_SYSTEM}'")
+    else()
+        set(TARGET_PLATFORM_LINUX 0 PARENT_SCOPE)
+    endif()
     if(NOT CONFIGURE_FOUND_PLATFORM)
         message(FATAL_ERROR "Unable to identify a target platform based on vendor '${TARGET_VENDOR}' and system '${TARGET_SYSTEM}'")
     endif()
@@ -203,6 +210,7 @@ function(define config_file_name config_header_name)
         TARGET_ARCHITECTURE=\"${TARGET_ARCHITECTURE}\"
         TARGET_PLATFORM_WIN32=${TARGET_PLATFORM_WIN32}
         TARGET_PLATFORM_DARWIN=${TARGET_PLATFORM_DARWIN}
+        TARGET_PLATFORM_LINUX=${TARGET_PLATFORM_LINUX}
         TARGET_STDC_VERSION=${TARGET_STDC_VERSION}
         TARGET_SIZEOF_VOID_P=${TARGET_SIZEOF_VOID_P}
         TARGET_SUPPORTS_UNICODE=${TARGET_SUPPORTS_UNICODE}
@@ -218,6 +226,7 @@ function(define config_file_name config_header_name)
     message(STATUS "Added compile definition TARGET_ARCHITECTURE=\"${TARGET_ARCHITECTURE}\"")
     message(STATUS "Added compile definition TARGET_PLATFORM_WIN32=${TARGET_PLATFORM_WIN32}")
     message(STATUS "Added compile definition TARGET_PLATFORM_DARWIN=${TARGET_PLATFORM_DARWIN}")
+    message(STATUS "Added compile definition TARGET_PLATFORM_LINUX=${TARGET_PLATFORM_LINUX}")
     message(STATUS "Added compile definition TARGET_STDC_VERSION=${TARGET_STDC_VERSION}")
     message(STATUS "Added compile definition TARGET_SIZEOF_VOID_P=${TARGET_SIZEOF_VOID_P}")
     message(STATUS "Added compile definition TARGET_SUPPORTS_UNICODE=${TARGET_SUPPORTS_UNICODE}")

@@ -359,32 +359,94 @@
             }
         },
         {
-            "name": "aclang17-darwin246",
+            "name": "aclang17-darwin24.6",
             "hidden": true,
             "inherits": "aclang17",
             "cacheVariables": {
-                "TARGET_SYSTEM": "darwin246"
+                "TARGET_SYSTEM": "darwin24.6"
             }
         },
         {
-            "name": "aclang17-darwin246-x64",
-            "displayName": "macOS Darwin 24.5 (x64)",
-            "description": "Configure Clang (v17) for macOS Darwin 24.5 (x64)",
-            "inherits": "aclang17-darwin246",
-            "binaryDir": "${sourceDir}/target/aclang17-darwin246-x64",
+            "name": "aclang17-darwin24.6-x64",
+            "displayName": "macOS Darwin 24.6 (x64)",
+            "description": "Configure Clang (v17) for macOS Darwin 24.6 (x64)",
+            "inherits": "aclang17-darwin24.6",
+            "binaryDir": "${sourceDir}/target/aclang17-darwin24.6-x64",
             "cacheVariables": {
                 "CMAKE_OSX_ARCHITECTURES": "x86_64",
                 "TARGET_ARCHITECTURE": "x64"
             }
         },
         {
-            "name": "aclang17-darwin246-arm64",
-            "displayName": "macOS Darwin 24.5 (ARM64)",
-            "description": "Configure Clang (v17) for macOS Darwin 24.5 (ARM64)",
-            "inherits": "aclang17-darwin246",
-            "binaryDir": "${sourceDir}/target/aclang17-darwin246-arm64",
+            "name": "aclang17-darwin24.6-arm64",
+            "displayName": "macOS Darwin 24.6 (ARM64)",
+            "description": "Configure Clang (v17) for macOS Darwin 24.6 (ARM64)",
+            "inherits": "aclang17-darwin24.6",
+            "binaryDir": "${sourceDir}/target/aclang17-darwin24.6-arm64",
             "cacheVariables": {
                 "CMAKE_OSX_ARCHITECTURES": "arm64",
+                "TARGET_ARCHITECTURE": "arm64"
+            }
+        },
+        {
+            "name": "gcc16",
+            "hidden": true,
+            "generator": "Ninja Multi-Config",
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Linux"
+            },
+            "cacheVariables": {
+                "CMAKE_CONFIGURATION_TYPES": "Debug;Release",
+                "CMAKE_VERBOSE_MAKEFILE": "ON",
+                "CMAKE_C_STANDARD": "23",
+                "CMAKE_C_STANDARD_REQUIRED": "ON",
+                "CMAKE_C_EXTENSIONS": "OFF",
+                "CMAKE_C_COMPILER": "/usr/bin/gcc-16",
+                "CMAKE_CXX_STANDARD": "23",
+                "CMAKE_CXX_STANDARD_REQUIRED": "ON",
+                "CMAKE_CXX_EXTENSIONS": "OFF",
+                "CMAKE_CXX_COMPILER": "/usr/bin/g++-16",
+                "CMAKE_SYSTEM_NAME": "Linux",
+                "TARGET_VENDOR": "linux"
+            }
+        },
+        {
+            "name": "gcc16-linux7.0",
+            "hidden": true,
+            "inherits": "gcc16",
+            "cacheVariables": {
+                "TARGET_SYSTEM": "linux7.0"
+            }
+        },
+        {
+            "name": "gcc16-linux7.0-x86",
+            "displayName": "Linux 7.0 (x86)",
+            "description": "Configure GCC (v16) for Linux 7.0 (x86)",
+            "inherits": "gcc16-linux7.0",
+            "binaryDir": "${sourceDir}/target/gcc16-linux7.0-x86",
+            "cacheVariables": {
+                "TARGET_ARCHITECTURE": "x86"
+            }
+        },
+        {
+            "name": "gcc16-linux7.0-x64",
+            "displayName": "Linux 7.0 (x64)",
+            "description": "Configure GCC (v16) for Linux 7.0 (x64)",
+            "inherits": "gcc16-linux7.0",
+            "binaryDir": "${sourceDir}/target/gcc16-linux7.0-x64",
+            "cacheVariables": {
+                "TARGET_ARCHITECTURE": "x64"
+            }
+        },
+        {
+            "name": "gcc16-linux7.0-arm64",
+            "displayName": "Linux 7.0 (ARM64)",
+            "description": "Configure GCC (v16) for Linux 7.0 (ARM64)",
+            "inherits": "gcc16-linux7.0",
+            "binaryDir": "${sourceDir}/target/gcc16-linux7.0-arm64",
+            "cacheVariables": {
                 "TARGET_ARCHITECTURE": "arm64"
             }
         }
@@ -573,32 +635,74 @@
             "description": "Build with MSVC (v14.4) for Windows NT 10.0 (ARM64)"
         },
         {
-            "name": "aclang17-darwin246-x64-debug",
+            "name": "aclang17-darwin24.6-x64-debug",
             "configuration": "Debug",
-            "configurePreset": "aclang17-darwin246-x64",
+            "configurePreset": "aclang17-darwin24.6-x64",
             "displayName": "Debug",
-            "description": "Build with Clang (v17) for macOS Darwin 24.5 (x64)"
+            "description": "Build with Clang (v17) for macOS Darwin 24.6 (x64)"
         },
         {
-            "name": "aclang17-darwin246-x64-release",
+            "name": "aclang17-darwin24.6-x64-release",
             "configuration": "Release",
-            "configurePreset": "aclang17-darwin246-x64",
+            "configurePreset": "aclang17-darwin24.6-x64",
             "displayName": "Release",
-            "description": "Build with Clang (v17) for macOS Darwin 24.5 (x64)"
+            "description": "Build with Clang (v17) for macOS Darwin 24.6 (x64)"
         },
         {
-            "name": "aclang17-darwin246-arm64-debug",
+            "name": "aclang17-darwin24.6-arm64-debug",
             "configuration": "Debug",
-            "configurePreset": "aclang17-darwin246-arm64",
+            "configurePreset": "aclang17-darwin24.6-arm64",
             "displayName": "Debug",
-            "description": "Build with Clang (v17) for macOS Darwin 24.5 (ARM64)"
+            "description": "Build with Clang (v17) for macOS Darwin 24.6 (ARM64)"
         },
         {
-            "name": "aclang17-darwin246-arm64-release",
+            "name": "aclang17-darwin24.6-arm64-release",
             "configuration": "Release",
-            "configurePreset": "aclang17-darwin246-arm64",
+            "configurePreset": "aclang17-darwin24.6-arm64",
             "displayName": "Release",
-            "description": "Build with Clang (v17) for macOS Darwin 24.5 (ARM64)"
+            "description": "Build with Clang (v17) for macOS Darwin 24.6 (ARM64)"
+        },
+        {
+            "name": "gcc16-linux7.0-x86-debug",
+            "configuration": "Debug",
+            "configurePreset": "gcc16-linux7.0-x86",
+            "displayName": "Debug",
+            "description": "Build with GCC (v16) for Linux 7.0 (x86)"
+        },
+        {
+            "name": "gcc16-linux7.0-x86-release",
+            "configuration": "Release",
+            "configurePreset": "gcc16-linux7.0-x86",
+            "displayName": "Release",
+            "description": "Build with GCC (v16) for Linux 7.0 (x86)"
+        },
+        {
+            "name": "gcc16-linux7.0-x64-debug",
+            "configuration": "Debug",
+            "configurePreset": "gcc16-linux7.0-x64",
+            "displayName": "Debug",
+            "description": "Build with GCC (v16) for Linux 7.0 (x64)"
+        },
+        {
+            "name": "gcc16-linux7.0-x64-release",
+            "configuration": "Release",
+            "configurePreset": "gcc16-linux7.0-x64",
+            "displayName": "Release",
+            "description": "Build with GCC (v16) for Linux 7.0 (x64)"
+        },
+        {
+            "name": "gcc16-linux7.0-arm64-debug",
+            "configuration": "Debug",
+            "configurePreset": "gcc16-linux7.0-arm64",
+            "displayName": "Debug",
+            "description": "Build with GCC (v16) for Linux 7.0 (ARM64)"
+        },
+        {
+            "name": "gcc16-linux7.0-arm64-release",
+            "configuration": "Release",
+            "configurePreset": "gcc16-linux7.0-arm64",
+            "displayName": "Release",
+            "description": "Build with GCC (v16) for Linux 7.0 (ARM64)"
         }
     ]
 }

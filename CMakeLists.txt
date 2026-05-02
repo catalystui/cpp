@@ -36,6 +36,12 @@ elseif(TARGET_PLATFORM_WIN32)
         SOURCES
             src/CATMMLIB.win32.cpp
     )
+elseif(TARGET_PLATFORM_LINUX)
+    configure_target(
+        TARGETS CATMMLIB_SHARED CATMMLIB_STATIC
+        SOURCES
+            src/CATMMLIB.linux.cpp
+    )
 else()
     message(WARNING "No platform-specific source files configured for CATMMLIB!")
 endif()
