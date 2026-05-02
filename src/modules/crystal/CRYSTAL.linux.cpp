@@ -5,57 +5,8 @@
 #include "modules/crystal/CRYSTAL.h"
 #include "modules/crystal/CRYSTAL.linux.h"
 #include "CRYSTAL.internal.h"
-
 #if !TARGET_SHARED
-/* Statically linked method headers for each display server backend */
-
-/* X11 */
-CRYSTALwindow* crystalCreateWindowX11(CATALYST_RESULT* result);
-void crystalProcessEventsX11(CATALYST_BOOL wait);
-void crystalSetWindowTitleX11(CRYSTALwindow* window, CATALYST_UTF8 title, CATALYST_RESULT* result);
-void crystalGetWindowTitleX11(CRYSTALwindow* window, CATALYST_UTF8W title, CATALYST_NUINT capacity, CATALYST_NUINT* length, CATALYST_RESULT* result);
-void crystalSetWindowPositionX11(CRYSTALwindow* window, CATALYST_NUINT x, CATALYST_NUINT y, CATALYST_RESULT* result);
-void crystalGetWindowPositionX11(CRYSTALwindow* window, CATALYST_NUINT* x, CATALYST_NUINT* y, CATALYST_RESULT* result);
-void crystalSetWindowSizeX11(CRYSTALwindow* window, CATALYST_NUINT width, CATALYST_NUINT height, CATALYST_RESULT* result);
-void crystalGetWindowSizeX11(CRYSTALwindow* window, CATALYST_NUINT* width, CATALYST_NUINT* height, CATALYST_RESULT* result);
-void crystalSetWindowSizeLimitsX11(CRYSTALwindow* window, CATALYST_NUINT minWidth, CATALYST_NUINT minHeight, CATALYST_NUINT maxWidth, CATALYST_NUINT maxHeight, CATALYST_RESULT* result);
-void crystalGetWindowSizeLimitsX11(CRYSTALwindow* window, CATALYST_NUINT* minWidth, CATALYST_NUINT* minHeight, CATALYST_NUINT* maxWidth, CATALYST_NUINT* maxHeight, CATALYST_RESULT* result);
-void crystalSetWindowStyleX11(CRYSTALwindow* window, CRYSTAL_PROPERTIES_STYLE style, CATALYST_RESULT* result);
-void crystalGetWindowStyleX11(CRYSTALwindow* window, CRYSTAL_PROPERTIES_STYLE* style, CATALYST_RESULT* result);
-void crystalRequestWindowFocusX11(CRYSTALwindow* window, CATALYST_RESULT* result);
-void crystalRequestWindowAttentionX11(CRYSTALwindow* window, CATALYST_RESULT* result);
-void crystalMinimizeWindowX11(CRYSTALwindow* window, CATALYST_RESULT* result);
-void crystalMaximizeWindowX11(CRYSTALwindow* window, CATALYST_RESULT* result);
-void crystalRestoreWindowX11(CRYSTALwindow* window, CATALYST_RESULT* result);
-void crystalShowWindowX11(CRYSTALwindow* window, CATALYST_RESULT* result);
-void crystalHideWindowX11(CRYSTALwindow* window, CATALYST_RESULT* result);
-void crystalGetWindowStateX11(CRYSTALwindow* window, CRYSTAL_PROPERTIES_STATE* state);
-void crystalCloseWindowX11(CRYSTALwindow* window, CATALYST_RESULT* result);
-void crystalDestroyWindowX11(CRYSTALwindow* window, CATALYST_RESULT* result);
-
-/* Wayland */
-CRYSTALwindow* crystalCreateWindowWayland(CATALYST_RESULT* result);
-void crystalProcessEventsWayland(CATALYST_BOOL wait);
-void crystalSetWindowTitleWayland(CRYSTALwindow* window, CATALYST_UTF8 title, CATALYST_RESULT* result);
-void crystalGetWindowTitleWayland(CRYSTALwindow* window, CATALYST_UTF8W title, CATALYST_NUINT capacity, CATALYST_NUINT* length, CATALYST_RESULT* result);
-void crystalSetWindowPositionWayland(CRYSTALwindow* window, CATALYST_NUINT x, CATALYST_NUINT y, CATALYST_RESULT* result);
-void crystalGetWindowPositionWayland(CRYSTALwindow* window, CATALYST_NUINT* x, CATALYST_NUINT* y, CATALYST_RESULT* result);
-void crystalSetWindowSizeWayland(CRYSTALwindow* window, CATALYST_NUINT width, CATALYST_NUINT height, CATALYST_RESULT* result);
-void crystalGetWindowSizeWayland(CRYSTALwindow* window, CATALYST_NUINT* width, CATALYST_NUINT* height, CATALYST_RESULT* result);
-void crystalSetWindowSizeLimitsWayland(CRYSTALwindow* window, CATALYST_NUINT minWidth, CATALYST_NUINT minHeight, CATALYST_NUINT maxWidth, CATALYST_NUINT maxHeight, CATALYST_RESULT* result);
-void crystalGetWindowSizeLimitsWayland(CRYSTALwindow* window, CATALYST_NUINT* minWidth, CATALYST_NUINT* minHeight, CATALYST_NUINT* maxWidth, CATALYST_NUINT* maxHeight, CATALYST_RESULT* result);
-void crystalSetWindowStyleWayland(CRYSTALwindow* window, CRYSTAL_PROPERTIES_STYLE style, CATALYST_RESULT* result);
-void crystalGetWindowStyleWayland(CRYSTALwindow* window, CRYSTAL_PROPERTIES_STYLE* style, CATALYST_RESULT* result);
-void crystalRequestWindowFocusWayland(CRYSTALwindow* window, CATALYST_RESULT* result);
-void crystalRequestWindowAttentionWayland(CRYSTALwindow* window, CATALYST_RESULT* result);
-void crystalMinimizeWindowWayland(CRYSTALwindow* window, CATALYST_RESULT* result);
-void crystalMaximizeWindowWayland(CRYSTALwindow* window, CATALYST_RESULT* result);
-void crystalRestoreWindowWayland(CRYSTALwindow* window, CATALYST_RESULT* result);
-void crystalShowWindowWayland(CRYSTALwindow* window, CATALYST_RESULT* result);
-void crystalHideWindowWayland(CRYSTALwindow* window, CATALYST_RESULT* result);
-void crystalGetWindowStateWayland(CRYSTALwindow* window, CRYSTAL_PROPERTIES_STATE* state);
-void crystalCloseWindowWayland(CRYSTALwindow* window, CATALYST_RESULT* result);
-void crystalDestroyWindowWayland(CRYSTALwindow* window, CATALYST_RESULT* result);
+#include "CRYSTAL.linux.internal.h"
 #endif
 
 #include <dlfcn.h>
@@ -369,100 +320,174 @@ extern "C" CRYSTAL_DISPLAY_SERVER crystalGetDisplayServer(CATALYST_RESULT* resul
     return displayServer;
 }
 
+// TODO: document context code is set to initialization opcode when display server fails to load
+// TODO: document when context code is set, opcode is backend-specific detail (error) code for failure
 extern "C" CRYSTALwindow* crystalCreateWindow(CATALYST_RESULT* result) {
     if (crystalGetDisplayServer(result) == CRYSTAL_DISPLAY_SERVER_NONE) {
-        if (result != 0) {
-            BYTE context = result->operation;
-            *result = RESULT(STATUS_CODE_ERROR_SYSTEM_NOT_SUPPORTED, context, 0, 0);
-        }
+        if (result != 0) *result = RESULT(STATUS_CODE_ERROR_SYSTEM_NOT_SUPPORTED, result->operation, result->detail, 0);
         return 0;
     }
     return backendCreateWindow(result);
 }
 
 void crystalProcessEvents(CATALYST_BOOL wait) {
-
+    if (backendProcessEvents != 0) backendProcessEvents(wait);
 }
 
 extern "C" void crystalSetWindowTitle(CRYSTALwindow* window, CATALYST_UTF8 title, CATALYST_RESULT* result) {
-
+    if (backendSetWindowTitle != 0) {
+        backendSetWindowTitle(window, title, result);
+    } else {
+        if (result != 0) *result = RESULT(STATUS_CODE_ERROR_INVALID_STATE, 0, 0, 0);
+    }
 }
 
 extern "C" void crystalGetWindowTitle(CRYSTALwindow* window, CATALYST_UTF8W title, CATALYST_NUINT capacity, CATALYST_NUINT* length, CATALYST_RESULT* result) {
-
+    if (backendGetWindowTitle != 0) {
+        backendGetWindowTitle(window, title, capacity, length, result);
+    } else {
+        if (result != 0) *result = RESULT(STATUS_CODE_ERROR_INVALID_STATE, 0, 0, 0);
+    }
 }
 
 extern "C" void crystalSetWindowPosition(CRYSTALwindow* window, CATALYST_NUINT x, CATALYST_NUINT y, CATALYST_RESULT* result) {
-
+    if (backendSetWindowPosition != 0) {
+        backendSetWindowPosition(window, x, y, result);
+    } else {
+        if (result != 0) *result = RESULT(STATUS_CODE_ERROR_INVALID_STATE, 0, 0, 0);
+    }
 }
 
 extern "C" void crystalGetWindowPosition(CRYSTALwindow* window, CATALYST_NUINT* x, CATALYST_NUINT* y, CATALYST_RESULT* result) {
-
+    if (backendGetWindowPosition != 0) {
+        backendGetWindowPosition(window, x, y, result);
+    } else {
+        if (result != 0) *result = RESULT(STATUS_CODE_ERROR_INVALID_STATE, 0, 0, 0);
+    }
 }
 
 extern "C" void crystalSetWindowSize(CRYSTALwindow* window, CATALYST_NUINT width, CATALYST_NUINT height, CATALYST_RESULT* result) {
-
+    if (backendSetWindowSize != 0) {
+        backendSetWindowSize(window, width, height, result);
+    } else {
+        if (result != 0) *result = RESULT(STATUS_CODE_ERROR_INVALID_STATE, 0, 0, 0);
+    }
 }
 
 extern "C" void crystalGetWindowSize(CRYSTALwindow* window, CATALYST_NUINT* width, CATALYST_NUINT* height, CATALYST_RESULT* result) {
-
+    if (backendGetWindowSize != 0) {
+        backendGetWindowSize(window, width, height, result);
+    } else {
+        if (result != 0) *result = RESULT(STATUS_CODE_ERROR_INVALID_STATE, 0, 0, 0);
+    }
 }
 
 extern "C" void crystalSetWindowSizeLimits(CRYSTALwindow* window, CATALYST_NUINT minWidth, CATALYST_NUINT minHeight, CATALYST_NUINT maxWidth, CATALYST_NUINT maxHeight, CATALYST_RESULT* result) {
-
+    if (backendSetWindowSizeLimits != 0) {
+        backendSetWindowSizeLimits(window, minWidth, minHeight, maxWidth, maxHeight, result);
+    } else {
+        if (result != 0) *result = RESULT(STATUS_CODE_ERROR_INVALID_STATE, 0, 0, 0);
+    }
 }
 
 extern "C" void crystalGetWindowSizeLimits(CRYSTALwindow* window, CATALYST_NUINT* minWidth, CATALYST_NUINT* minHeight, CATALYST_NUINT* maxWidth, CATALYST_NUINT* maxHeight, CATALYST_RESULT* result) {
-
+    if (backendGetWindowSizeLimits != 0) {
+        backendGetWindowSizeLimits(window, minWidth, minHeight, maxWidth, maxHeight, result);
+    } else {
+        if (result != 0) *result = RESULT(STATUS_CODE_ERROR_INVALID_STATE, 0, 0, 0);
+    }
 }
 
 extern "C" void crystalSetWindowStyle(CRYSTALwindow* window, CRYSTAL_PROPERTIES_STYLE style, CATALYST_RESULT* result) {
-
+    if (backendSetWindowStyle != 0) {
+        backendSetWindowStyle(window, style, result);
+    } else {
+        if (result != 0) *result = RESULT(STATUS_CODE_ERROR_INVALID_STATE, 0, 0, 0);
+    }
 }
 
 extern "C" void crystalGetWindowStyle(CRYSTALwindow* window, CRYSTAL_PROPERTIES_STYLE* style, CATALYST_RESULT* result) {
-
+    if (backendGetWindowStyle != 0) {
+        backendGetWindowStyle(window, style, result);
+    } else {
+        if (result != 0) *result = RESULT(STATUS_CODE_ERROR_INVALID_STATE, 0, 0, 0);
+    }
 }
 
 extern "C" void crystalRequestWindowFocus(CRYSTALwindow* window, CATALYST_RESULT* result) {
-
+    if (backendRequestWindowFocus != 0) {
+        backendRequestWindowFocus(window, result);
+    } else {
+        if (result != 0) *result = RESULT(STATUS_CODE_ERROR_INVALID_STATE, 0, 0, 0);
+    }
 }
 
 extern "C" void crystalRequestWindowAttention(CRYSTALwindow* window, CATALYST_RESULT* result) {
-
+    if (backendRequestWindowAttention != 0) {
+        backendRequestWindowAttention(window, result);
+    } else {
+        if (result != 0) *result = RESULT(STATUS_CODE_ERROR_INVALID_STATE, 0, 0, 0);
+    }
 }
 
 extern "C" void crystalMinimizeWindow(CRYSTALwindow* window, CATALYST_RESULT* result) {
-
+    if (backendMinimizeWindow != 0) {
+        backendMinimizeWindow(window, result);
+    } else {
+        if (result != 0) *result = RESULT(STATUS_CODE_ERROR_INVALID_STATE, 0, 0, 0);
+    }
 }
 
 extern "C" void crystalMaximizeWindow(CRYSTALwindow* window, CATALYST_RESULT* result) {
-
+    if (backendMaximizeWindow != 0) {
+        backendMaximizeWindow(window, result);
+    } else {
+        if (result != 0) *result = RESULT(STATUS_CODE_ERROR_INVALID_STATE, 0, 0, 0);
+    }
 }
 
 extern "C" void crystalRestoreWindow(CRYSTALwindow* window, CATALYST_RESULT* result) {
-
+    if (backendRestoreWindow != 0) {
+        backendRestoreWindow(window, result);
+    } else {
+        if (result != 0) *result = RESULT(STATUS_CODE_ERROR_INVALID_STATE, 0, 0, 0);
+    }
 }
 
 extern "C" void crystalShowWindow(CRYSTALwindow* window, CATALYST_RESULT* result) {
-
+    if (backendShowWindow != 0) {
+        backendShowWindow(window, result);
+    } else {
+        if (result != 0) *result = RESULT(STATUS_CODE_ERROR_INVALID_STATE, 0, 0, 0);
+    }
 }
 
 extern "C" void crystalHideWindow(CRYSTALwindow* window, CATALYST_RESULT* result) {
-
+    if (backendHideWindow != 0) {
+        backendHideWindow(window, result);
+    } else {
+        if (result != 0) *result = RESULT(STATUS_CODE_ERROR_INVALID_STATE, 0, 0, 0);
+    }
 }
 
 extern "C" void crystalGetWindowState(CRYSTALwindow* window, CRYSTAL_PROPERTIES_STATE* state) {
-
+    if (backendGetWindowState != 0) backendGetWindowState(window, state);
 }
 
 extern "C" void crystalCloseWindow(CRYSTALwindow* window, CATALYST_RESULT* result) {
-
+    if (backendCloseWindow != 0) {
+        backendCloseWindow(window, result);
+    } else {
+        if (result != 0) *result = RESULT(STATUS_CODE_ERROR_INVALID_STATE, 0, 0, 0);
+    }
 }
 
 extern "C" void crystalDestroyWindow(CRYSTALwindow* window, CATALYST_RESULT* result) {
-
+    if (backendDestroyWindow != 0) {
+        backendDestroyWindow(window, result);
+    } else {
+        if (result != 0) *result = RESULT(STATUS_CODE_ERROR_INVALID_STATE, 0, 0, 0);
+    }
 }
-
 
 #endif /* TARGET_PLATFORM_LINUX */

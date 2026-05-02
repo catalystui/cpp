@@ -5,9 +5,6 @@
 extern "C" {
 #endif
 
-// TODO: document ALL result codes for CRYSTAL will report using a CONTEXT CODE
-//       for the result of the display server's initialization and functionality
-
 typedef CATALYST_BYTE CRYSTAL_DISPLAY_SERVER;
 enum {
     CRYSTAL_DISPLAY_SERVER_NONE     = 0x00,
