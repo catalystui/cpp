@@ -57,35 +57,48 @@ function(configure target_vendor target_system target_architecture)
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${OUTPUT_DIRECTORY}" PARENT_SCOPE)
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${OUTPUT_DIRECTORY}/lib" PARENT_SCOPE)
 
-    set(CMAKE_SHARED_LIBRARY_PREFIX "" PARENT_SCOPE)
-    set(CMAKE_STATIC_LIBRARY_PREFIX "" PARENT_SCOPE)
-    message(STATUS "Stripped library prefixes for shared and static libraries")
-
     # Identify target platform
     if(TARGET_VENDOR STREQUAL "microsoft" AND (TARGET_SYSTEM MATCHES "^nt" OR TARGET_SYSTEM MATCHES "^win"))
         set(CONFIGURE_FOUND_PLATFORM 1)
         set(TARGET_PLATFORM_WIN32 1 PARENT_SCOPE)
+        set(TARGET_PLATFORM_WIN32 1)
         message(STATUS "Identified target platform as Win32 based on vendor '${TARGET_VENDOR}' and system '${TARGET_SYSTEM}'")
     else()
         set(TARGET_PLATFORM_WIN32 0 PARENT_SCOPE)
+        set(TARGET_PLATFORM_WIN32 0)
         add_compile_definitions(TARGET_PLATFORM_WIN32=0)
     endif()
     if(TARGET_VENDOR STREQUAL "apple" AND TARGET_SYSTEM MATCHES "^darwin")
         set(CONFIGURE_FOUND_PLATFORM 1)
         set(TARGET_PLATFORM_DARWIN 1 PARENT_SCOPE)
+        set(TARGET_PLATFORM_DARWIN 1)
         message(STATUS "Identified target platform as Darwin based on vendor '${TARGET_VENDOR}' and system '${TARGET_SYSTEM}'")
     else()
         set(TARGET_PLATFORM_DARWIN 0 PARENT_SCOPE)
+        set(TARGET_PLATFORM_DARWIN 0)
     endif()
     if(TARGET_VENDOR STREQUAL "linux" AND TARGET_SYSTEM MATCHES "^linux")
         set(CONFIGURE_FOUND_PLATFORM 1)
         set(TARGET_PLATFORM_LINUX 1 PARENT_SCOPE)
+        set(TARGET_PLATFORM_LINUX 1)
         message(STATUS "Identified target platform as Linux based on vendor '${TARGET_VENDOR}' and system '${TARGET_SYSTEM}'")
     else()
         set(TARGET_PLATFORM_LINUX 0 PARENT_SCOPE)
+        set(TARGET_PLATFORM_LINUX 0)
     endif()
     if(NOT CONFIGURE_FOUND_PLATFORM)
         message(FATAL_ERROR "Unable to identify a target platform based on vendor '${TARGET_VENDOR}' and system '${TARGET_SYSTEM}'")
+    endif()
+
+    # Set library prefixes based on platform conventions
+    if(TARGET_PLATFORM_DARWIN OR TARGET_PLATFORM_LINUX)
+        set(CMAKE_SHARED_LIBRARY_PREFIX "lib" PARENT_SCOPE)
+        set(CMAKE_STATIC_LIBRARY_PREFIX "lib" PARENT_SCOPE)
+        message(STATUS "Using 'lib' prefix (UNIX-like conventions) for shared and static libraries")
+    else(TARGET_PLATFORM_WIN32)
+        set(CMAKE_SHARED_LIBRARY_PREFIX "" PARENT_SCOPE)
+        set(CMAKE_STATIC_LIBRARY_PREFIX "" PARENT_SCOPE)
+        message(STATUS "Stripped library prefixes for shared and static libraries")
     endif()
 
     # Identify UNICODE support
@@ -130,8 +143,12 @@ function(configure_target)
     endif()
     foreach(TARGET_NAME ${ARG_TARGETS})
         if(NOT "${ARG_NAME}" STREQUAL "")
+            set(CONFIGURE_OUTPUT_NAME "${ARG_NAME}")
+            if(TARGET_VENDOR STREQUAL "linux" AND TARGET_SYSTEM MATCHES "^linux")
+                string(TOLOWER "${CONFIGURE_OUTPUT_NAME}" CONFIGURE_OUTPUT_NAME)
+            endif()
             set_target_properties(${TARGET_NAME} PROPERTIES
-                OUTPUT_NAME "${ARG_NAME}"
+                OUTPUT_NAME "${CONFIGURE_OUTPUT_NAME}"
             )
         endif()
         if(NOT "${ARG_FOLDER}" STREQUAL "")
@@ -214,6 +231,7 @@ function(define config_file_name config_header_name)
         TARGET_STDC_VERSION=${TARGET_STDC_VERSION}
         TARGET_SIZEOF_VOID_P=${TARGET_SIZEOF_VOID_P}
         TARGET_SUPPORTS_UNICODE=${TARGET_SUPPORTS_UNICODE}
+        "$<$<STREQUAL:$<TARGET_PROPERTY:TYPE>,SHARED_LIBRARY>:TARGET_SHARED=1>"
     )
     message(STATUS "Added compile definition METADATA_NAME=\"${METADATA_NAME}\"")
     message(STATUS "Added compile definition METADATA_VERSION_MAJOR=${METADATA_VERSION_MAJOR}")
@@ -230,6 +248,7 @@ function(define config_file_name config_header_name)
     message(STATUS "Added compile definition TARGET_STDC_VERSION=${TARGET_STDC_VERSION}")
     message(STATUS "Added compile definition TARGET_SIZEOF_VOID_P=${TARGET_SIZEOF_VOID_P}")
     message(STATUS "Added compile definition TARGET_SUPPORTS_UNICODE=${TARGET_SUPPORTS_UNICODE}")
+    message(STATUS "Added compile definition TARGET_SHARED=1 for shared library targets")
 
     # Process the configuration file/header
     if(EXISTS "${CMAKE_SOURCE_DIR}/${config_file_name}")

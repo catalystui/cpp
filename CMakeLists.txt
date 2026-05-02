@@ -82,6 +82,52 @@ elseif(TARGET_PLATFORM_WIN32)
         SOURCES
             src/modules/crystal/CRYSTAL.win32.cpp
     )
+elseif(TARGET_PLATFORM_LINUX)
+    find_package(X11 REQUIRED)
+    add_library(CRYSTAL_X11_SHARED SHARED)
+    add_library(CRYSTAL_X11_STATIC STATIC)
+    configure_target(
+        NAME CRYSTAL-x11
+        TARGETS CRYSTAL_X11_SHARED CRYSTAL_X11_STATIC
+        SOURCES
+            src/modules/crystal/CRYSTAL.linux.x11.cpp
+        DEPENDS
+            CATMMLIB_SHARED
+            CATTELIB_SHARED
+            "X11::X11"
+    )
+    add_dependencies(CRYSTAL_SHARED CRYSTAL_X11_SHARED)
+    add_dependencies(CRYSTAL_STATIC CRYSTAL_X11_STATIC)
+
+    # find_package(Wayland REQUIRED)
+    # add_library(CRYSTAL_WAYLAND_SHARED SHARED)
+    # add_library(CRYSTAL_WAYLAND_STATIC STATIC)
+    # configure_target(
+    #     NAME CRYSTAL-wayland
+    #     TARGETS CRYSTAL_WAYLAND_SHARED CRYSTAL_WAYLAND_STATIC
+    #     SOURCES
+    #         src/modules/crystal/CRYSTAL.wayland.cpp
+    #     DEPENDS
+    #         CATMMLIB_SHARED
+    #         CATTELIB_SHARED
+    #         "Wayland::Wayland"
+    # )
+    # add_dependencies(CRYSTAL_SHARED CRYSTAL_WAYLAND_SHARED)
+    # add_dependencies(CRYSTAL_STATIC CRYSTAL_WAYLAND_STATIC)
+
+    configure_target(
+        TARGETS CRYSTAL_SHARED
+        SOURCES
+            src/modules/crystal/CRYSTAL.linux.cpp
+    )
+    configure_target(
+        TARGETS CRYSTAL_STATIC
+        SOURCES
+            src/modules/crystal/CRYSTAL.linux.cpp
+        DEPENDS
+            CRYSTAL_X11_STATIC
+            # CRYSTAL_WAYLAND_STATIC
+    )
 else()
     message(WARNING "No platform-specific source files configured for CRYSTAL!")
 endif()
@@ -111,6 +157,22 @@ if(EXISTS "${CMAKE_SOURCE_DIR}/test")
                         MACOSX_BUNDLE_GUI_IDENTIFIER "org.catalystui.${TEST_NAME}"
                     )
                     message(STATUS "Configured ${TEST_NAME} as a macOS GUI application")
+                elseif(TARGET_PLATFORM_LINUX)
+                    # Also export a shared executable to test .so library loading
+                    add_executable(${TEST_NAME}_shared
+                        "${TEST_SOURCE}"
+                    )
+                    configure_target(
+                        NAME ${TEST_NAME}_shared
+                        FOLDER "test"
+                        SUBDIR "test/"
+                        TARGETS ${TEST_NAME}_shared
+                        DEPENDS
+                            CATMMLIB_SHARED
+                            CATTELIB_SHARED
+                            CRYSTAL_SHARED
+                    )
+                    message(STATUS "Configured ${TEST_NAME}_SHARED as a Linux GUI application")
                 endif()
             endif()
             if(MSVC)
