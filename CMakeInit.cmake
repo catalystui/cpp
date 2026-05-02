@@ -147,7 +147,7 @@ function(configure_target)
     foreach(TARGET_NAME ${ARG_TARGETS})
         if(NOT "${ARG_NAME}" STREQUAL "")
             set(CONFIGURE_OUTPUT_NAME "${ARG_NAME}")
-            if(TARGET_VENDOR STREQUAL "linux" AND TARGET_SYSTEM MATCHES "^linux")
+            if(TARGET_PLATFORM_DARWIN OR TARGET_PLATFORM_LINUX)
                 string(TOLOWER "${CONFIGURE_OUTPUT_NAME}" CONFIGURE_OUTPUT_NAME)
             endif()
             set_target_properties(${TARGET_NAME} PROPERTIES
