@@ -107,6 +107,9 @@ function(configure target_vendor target_system target_architecture)
     elseif(TARGET_VENDOR STREQUAL "apple" AND TARGET_SYSTEM MATCHES "^darwin")
         # TODO: Determine when the cutoff for UNICODE support on Darwin is, and condition this on the version
         set(TARGET_SUPPORTS_UNICODE 1 PARENT_SCOPE)
+    elseif(TARGET_VENDOR STREQUAL "linux" AND TARGET_SYSTEM MATCHES "^linux")
+        # TODO: Determine when the cutoff for UNICODE support on Linux is, and condition this on the version and/or C library
+        set(TARGET_SUPPORTS_UNICODE 1 PARENT_SCOPE)
     else()
         set(TARGET_SUPPORTS_UNICODE 0 PARENT_SCOPE)
     endif()

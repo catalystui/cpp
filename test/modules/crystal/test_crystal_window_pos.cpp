@@ -10,6 +10,11 @@ struct AppState {
 static AppState appState;
 static int failed = 0;
 
+enum {
+    WAIT_ATTEMPTS = 500,
+    STABLE_READS = 2
+};
+
 static void printResult(const char* name, CATALYST_RESULT result) {
     printf(
         "%s -> status=0x%02X context=0x%02X operation=0x%02X detail=0x%02X\n",
@@ -45,7 +50,7 @@ static void waitForEnter(const char* message) {
 static void drainEvents() {
     int i;
 
-    for (i = 0; i < 10; i += 1) {
+    for (i = 0; i < 25; i += 1) {
         crystalPollEvents();
     }
 }
@@ -68,6 +73,42 @@ static void failPositionMismatch(
     failed += 1;
 }
 
+static int waitForPosition(
+    CRYSTALwindow* window,
+    CATALYST_NUINT expectedX,
+    CATALYST_NUINT expectedY,
+    CATALYST_NUINT* actualX,
+    CATALYST_NUINT* actualY,
+    CATALYST_RESULT* result
+) {
+    int i;
+    int stable;
+
+    stable = 0;
+
+    for (i = 0; i < WAIT_ATTEMPTS; i += 1) {
+        crystalPollEvents();
+
+        crystalGetWindowPosition(window, actualX, actualY, result);
+
+        if (result->status != CATALYST_STATUS_CODE_SUCCESS) {
+            return 0;
+        }
+
+        if (*actualX == expectedX && *actualY == expectedY) {
+            stable += 1;
+
+            if (stable >= STABLE_READS) {
+                return 1;
+            }
+        } else {
+            stable = 0;
+        }
+    }
+
+    return 0;
+}
+
 static void testPosition(
     CRYSTALwindow* window,
     const char* name,
@@ -88,16 +129,12 @@ static void testPosition(
         return;
     }
 
-    drainEvents();
+    if (!waitForPosition(window, expectedX, expectedY, &actualX, &actualY, &result)) {
+        if (result.status != CATALYST_STATUS_CODE_SUCCESS) {
+            fail(name, result);
+            return;
+        }
 
-    crystalGetWindowPosition(window, &actualX, &actualY, &result);
-
-    if (result.status != CATALYST_STATUS_CODE_SUCCESS) {
-        fail(name, result);
-        return;
-    }
-
-    if (actualX != expectedX || actualY != expectedY) {
         failPositionMismatch(name, expectedX, expectedY, actualX, actualY);
         return;
     }
@@ -130,28 +167,13 @@ int main() {
     drainEvents();
 
     waitForEnter("Press Enter to move the window to x=100 y=100...");
-    testPosition(
-        window,
-        "crystalSet/GetWindowPosition x=100 y=100",
-        100,
-        100
-    );
+    testPosition(window, "crystalSet/GetWindowPosition x=100 y=100", 100, 100);
 
     waitForEnter("Inspect the window position, then press Enter to move it to x=300 y=200...");
-    testPosition(
-        window,
-        "crystalSet/GetWindowPosition x=300 y=200",
-        300,
-        200
-    );
+    testPosition(window, "crystalSet/GetWindowPosition x=300 y=200", 300, 200);
 
     waitForEnter("Inspect the window position, then press Enter to move it to x=50 y=50...");
-    testPosition(
-        window,
-        "crystalSet/GetWindowPosition x=50 y=50",
-        50,
-        50
-    );
+    testPosition(window, "crystalSet/GetWindowPosition x=50 y=50", 50, 50);
 
     waitForEnter("Inspect the final window position, then press Enter to destroy the window...");
 

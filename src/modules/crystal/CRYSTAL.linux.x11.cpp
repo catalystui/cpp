@@ -15,8 +15,16 @@ typedef struct CRYSTALx11Platform {
     Display* display;
     Window window;
     Atom wmDeleteWindow;
+    catalyst::NUINT minWidth;
+    catalyst::NUINT minHeight;
+    catalyst::NUINT maxWidth;
+    catalyst::NUINT maxHeight;
     catalyst::BOOL destroying;
 } CRYSTALx11Platform;
+
+typedef struct CRYSTALx11WaitConfigureData {
+    Window window;
+} CRYSTALx11WaitConfigureData;
 
 static Display* crystalX11Display = 0;
 static XContext crystalX11Context = 0;
@@ -28,6 +36,36 @@ static CRYSTALwindow* crystalX11FindWindow(Display* display, Window xwindow) {
         return 0;
     }
     return (CRYSTALwindow*) pointer;
+}
+
+static void crystalX11GetFrameExtents(Display* display, Window xwindow, int* left, int* top) {
+    *left = 0;
+    *top = 0;
+    Atom property = XInternAtom(display, "_NET_FRAME_EXTENTS", True);
+    if (property == None) return;
+    Atom actualType;
+    int actualFormat;
+    unsigned long itemCount;
+    unsigned long bytesAfter;
+    unsigned char* data = 0;
+    if (XGetWindowProperty(display, xwindow, property, 0, 4, False, XA_CARDINAL, &actualType, &actualFormat, &itemCount, &bytesAfter, &data) != Success) {
+        return;
+    }
+    if (data != 0) {
+        if (actualType == XA_CARDINAL && actualFormat == 32 && itemCount >= 4) {
+            long* extents = (long*) data;
+            *left = (int) extents[0];
+            *top = (int) extents[2];
+        }
+        XFree(data);
+    }
+}
+
+static Bool crystalX11ConfigurePredicate(Display* display, XEvent* event, XPointer arg) {
+    CRYSTALx11WaitConfigureData* data = (CRYSTALx11WaitConfigureData*) arg;
+    return event != 0 &&
+        event->type == ConfigureNotify &&
+        event->xconfigure.window == data->window;
 }
 
 static void crystalX11HandleEvent(XEvent* event) {
@@ -85,6 +123,19 @@ static void crystalX11HandleEvent(XEvent* event) {
             }
             return;
     }
+}
+
+static void crystalX11WaitForConfigure(Display* display, Window xwindow) {
+    XEvent event;
+    CRYSTALx11WaitConfigureData data;
+    data.window = xwindow;
+    XSync(display, False);
+    if (XCheckTypedWindowEvent(display, xwindow, ConfigureNotify, &event)) {
+        crystalX11HandleEvent(&event);
+        return;
+    }
+    XIfEvent(display, &event, crystalX11ConfigurePredicate, (XPointer) &data);
+    crystalX11HandleEvent(&event);
 }
 
 // TODO: document opcode1 = failed to open display
@@ -173,6 +224,10 @@ CRYSTALwindow* crystalCreateWindowX11(CATALYST_RESULT* result) {
     platform->display = crystalX11Display;
     platform->window = xwindow;
     platform->wmDeleteWindow = wmDeleteWindow;
+    platform->minWidth = 0;
+    platform->minHeight = 0;
+    platform->maxWidth = 0;
+    platform->maxHeight = 0;
     platform->destroying = CATALYST_FALSE;
 
     // Assign native handles
@@ -209,35 +264,362 @@ void crystalProcessEventsX11(CATALYST_BOOL wait) {
 }
 
 void crystalSetWindowTitleX11(CRYSTALwindow* window, CATALYST_UTF8 title, CATALYST_RESULT* result) {
+    // Validate arguments
+    if (window == 0) {
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
+        return;
+    }
+    if (title == 0) {
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 1);
+        return;
+    }
+    if (window->native.primary == 0 || window->native.secondary == 0) {
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_STATE, 0, 0, 0);
+        return;
+    }
 
+    // Get the xwindow reference
+    Display* display = (Display*) window->native.secondary;
+    Window xwindow = (Window) window->native.primary;
+
+    // Calculate the title byte length
+    catalyst::NUINT length = 0;
+    while (title[length] != 0) {
+        length += 1;
+    }
+    Atom utf8String = XInternAtom(display, "UTF8_STRING", False);
+    Atom netWmName = XInternAtom(display, "_NET_WM_NAME", False);
+
+    // Set the window title
+    XChangeProperty(
+        display,
+        xwindow,
+        netWmName,
+        utf8String,
+        8,
+        PropModeReplace,
+        (const unsigned char*) title,
+        (int) length
+    );
+    XStoreName(display, xwindow, (const char*) title);
+    crystalX11WaitForConfigure(display, xwindow);
+
+    // Report success
+    if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_SUCCESS, 0, 0, 0);
 }
 
 void crystalGetWindowTitleX11(CRYSTALwindow* window, CATALYST_UTF8W title, CATALYST_NUINT capacity, CATALYST_NUINT* length, CATALYST_RESULT* result) {
+    // Validate arguments
+    if (window == 0) {
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
+        return;
+    }
+    if (title == 0) {
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 1);
+        return;
+    }
+    if (capacity == 0) {
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 2);
+        return;
+    }
+    title[0] = 0;
+    if (length == 0) {
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 3);
+        return;
+    }
+    *length = 0;
+    if (window->native.primary == 0 || window->native.secondary == 0) {
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_STATE, 0, 0, 0);
+        return;
+    }
 
+    // Get the xwindow reference
+    Display* display = (Display*) window->native.secondary;
+    Window xwindow = (Window) window->native.primary;
+    XSync(display, False);
+
+    // Fetch the native title
+    char* nativeTitle = 0;
+    if (XFetchName(display, xwindow, &nativeTitle) == 0 || nativeTitle == 0) {
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_SUCCESS_NOOP, 0, 0, 0);
+        return;
+    }
+
+    // Calculate the title byte length
+    catalyst::NUINT required = 0;
+    while (nativeTitle[required] != '\0') {
+        required += 1;
+    }
+    *length = required;
+
+    // Copy the title to the output buffer, truncating if necessary
+    catalyst::NUINT writable = capacity - 1;
+    catalyst::NUINT i = 0;
+    while (i < writable && i < required) {
+        title[i] = (catalyst::BYTE) nativeTitle[i];
+        i += 1;
+    }
+    title[i] = 0;
+
+    // Free the native title, check for overflow, and report success
+    XFree(nativeTitle);
+    if (i < required) {
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_WARNING_PARTIAL, 0, 0, 0);
+        return;
+    }
+    if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_SUCCESS, 0, 0, 0);
 }
 
 void crystalSetWindowPositionX11(CRYSTALwindow* window, CATALYST_NUINT x, CATALYST_NUINT y, CATALYST_RESULT* result) {
+    // Validate arguments
+    if (window == 0) {
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
+        return;
+    }
+    if (window->native.primary == 0 || window->native.secondary == 0) {
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_STATE, 0, 0, 0);
+        return;
+    }
 
+    // Get the xwindow reference
+    Display* display = (Display*) window->native.secondary;
+    Window xwindow = (Window) window->native.primary;
+
+    // Set the window position
+    XMoveWindow(display, xwindow, (int) x, (int) y);
+    crystalX11WaitForConfigure(display, xwindow);
+
+    // Report success
+    if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_SUCCESS, 0, 0, 0);
 }
 
 void crystalGetWindowPositionX11(CRYSTALwindow* window, CATALYST_NUINT* x, CATALYST_NUINT* y, CATALYST_RESULT* result) {
+    // Validate arguments
+    if (window == 0) {
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
+        return;
+    }
+    if (x == 0) {
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 1);
+        return;
+    }
+    *x = 0;
+    if (y == 0) {
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 2);
+        return;
+    }
+    *y = 0;
+    if (window->native.primary == 0 || window->native.secondary == 0) {
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_STATE, 0, 0, 0);
+        return;
+    }
 
+    // Get the xwindow reference
+    Display* display = (Display*) window->native.secondary;
+    Window xwindow = (Window) window->native.primary;
+    XSync(display, False);
+
+    // Translate the window coordinates to root coordinates
+    int nativeX = 0;
+    int nativeY = 0;
+    Window child = 0;
+    XTranslateCoordinates(
+        display,
+        xwindow,
+        RootWindow(display, DefaultScreen(display)),
+        0,
+        0,
+        &nativeX,
+        &nativeY,
+        &child
+    );
+    int frameLeft = 0;
+    int frameTop = 0;
+    crystalX11GetFrameExtents(display, xwindow, &frameLeft, &frameTop);
+    nativeX -= frameLeft;
+    nativeY -= frameTop;
+    *x = nativeX < 0 ? 0 : (catalyst::NUINT) nativeX;
+    *y = nativeY < 0 ? 0 : (catalyst::NUINT) nativeY;
+
+    // Report success
+    if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_SUCCESS, 0, 0, 0);
 }
 
 void crystalSetWindowSizeX11(CRYSTALwindow* window, CATALYST_NUINT width, CATALYST_NUINT height, CATALYST_RESULT* result) {
+    // Validate arguments
+    if (window == 0) {
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
+        return;
+    }
+    if (width == 0) {
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 1);
+        return;
+    }
+    if (height == 0) {
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 2);
+        return;
+    }
+    if (window->native.primary == 0 || window->native.secondary == 0) {
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_STATE, 0, 0, 0);
+        return;
+    }
 
+    // Get the platform storage and apply the size limits
+    CRYSTALx11Platform* platform = (CRYSTALx11Platform*) window->platform;
+    if (platform != 0) {
+        if (platform->minWidth != 0 && width < platform->minWidth) width = platform->minWidth;
+        if (platform->minHeight != 0 && height < platform->minHeight) height = platform->minHeight;
+        if (platform->maxWidth != 0 && width > platform->maxWidth) width = platform->maxWidth;
+        if (platform->maxHeight != 0 && height > platform->maxHeight) height = platform->maxHeight;
+    }
+
+    // Get the xwindow reference
+    Display* display = (Display*) window->native.secondary;
+    Window xwindow = (Window) window->native.primary;
+
+    // Set the window size
+    XResizeWindow(display, xwindow, (unsigned int) width, (unsigned int) height);
+    crystalX11WaitForConfigure(display, xwindow);
+
+    // Report success
+    if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_SUCCESS, 0, 0, 0);
 }
 
 void crystalGetWindowSizeX11(CRYSTALwindow* window, CATALYST_NUINT* width, CATALYST_NUINT* height, CATALYST_RESULT* result) {
+    // Validate arguments
+    if (window == 0) {
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
+        return;
+    }
+    if (width == 0) {
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 1);
+        return;
+    }
+    *width = 0;
+    if (height == 0) {
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 2);
+        return;
+    }
+    *height = 0;
+    if (window->native.primary == 0 || window->native.secondary == 0) {
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_STATE, 0, 0, 0);
+        return;
+    }
 
+    // Get the xwindow reference
+    Display* display = (Display*) window->native.secondary;
+    Window xwindow = (Window) window->native.primary;
+    XSync(display, False);
+
+    // Query the window attributes for the size
+    XWindowAttributes attributes;
+    if (XGetWindowAttributes(display, xwindow, &attributes) == 0) {
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_DEPENDENCY_FAILURE, 0, 1, 0);
+        return;
+    }
+    *width = (catalyst::NUINT) attributes.width;
+    *height = (catalyst::NUINT) attributes.height;
+
+    // Report success
+    if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_SUCCESS, 0, 0, 0);
 }
 
 void crystalSetWindowSizeLimitsX11(CRYSTALwindow* window, CATALYST_NUINT minWidth, CATALYST_NUINT minHeight, CATALYST_NUINT maxWidth, CATALYST_NUINT maxHeight, CATALYST_RESULT* result) {
+    // Validate arguments
+    if (window == 0) {
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
+        return;
+    }
+    if (maxWidth != 0 && minWidth != 0 && maxWidth < minWidth) {
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 3);
+        return;
+    }
+    if (maxHeight != 0 && minHeight != 0 && maxHeight < minHeight) {
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 4);
+        return;
+    }
+    if (window->native.primary == 0 || window->native.secondary == 0) {
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_STATE, 0, 0, 0);
+        return;
+    }
 
+    // Get the platform storage
+    CRYSTALx11Platform* platform = (CRYSTALx11Platform*) window->platform;
+    if (platform == 0) {
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_STATE, 0, 0, 1);
+        return;
+    }
+
+    // Get the xwindow reference
+    Display* display = (Display*) window->native.secondary;
+    Window xwindow = (Window) window->native.primary;
+
+    // Update the size limits in platform storage
+    platform->minWidth = minWidth;
+    platform->minHeight = minHeight;
+    platform->maxWidth = maxWidth;
+    platform->maxHeight = maxHeight;
+
+    // Update the size hints for the window manager
+    XSizeHints hints;
+    hints.flags = 0;
+    if (minWidth != 0 || minHeight != 0) {
+        hints.flags |= PMinSize;
+        hints.min_width = (int) minWidth;
+        hints.min_height = (int) minHeight;
+    }
+    if (maxWidth != 0 || maxHeight != 0) {
+        hints.flags |= PMaxSize;
+        hints.max_width = (int) maxWidth;
+        hints.max_height = (int) maxHeight;
+    }
+    XSetWMNormalHints(display, xwindow, &hints);
+    XFlush(display);
+
+    // Report success
+    if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_SUCCESS, 0, 0, 0);
 }
 
 void crystalGetWindowSizeLimitsX11(CRYSTALwindow* window, CATALYST_NUINT* minWidth, CATALYST_NUINT* minHeight, CATALYST_NUINT* maxWidth, CATALYST_NUINT* maxHeight, CATALYST_RESULT* result) {
+    // Validate arguments
+    if (window == 0) {
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
+        return;
+    }
+    if (minWidth == 0) {
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 1);
+        return;
+    }
+    *minWidth = 0;
+    if (minHeight == 0) {
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 2);
+        return;
+    }
+    *minHeight = 0;
+    if (maxWidth == 0) {
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 3);
+        return;
+    }
+    *maxWidth = 0;
+    if (maxHeight == 0) {
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 4);
+        return;
+    }
+    *maxHeight = 0;
 
+    // Get the platform storage
+    CRYSTALx11Platform* platform = (CRYSTALx11Platform*) window->platform;
+    if (platform == 0) {
+        if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_STATE, 0, 0, 1);
+        return;
+    }
+
+    // Return the size limits and report success
+    *minWidth = platform->minWidth;
+    *minHeight = platform->minHeight;
+    *maxWidth = platform->maxWidth;
+    *maxHeight = platform->maxHeight;
+    if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_SUCCESS, 0, 0, 0);
 }
 
 void crystalSetWindowStyleX11(CRYSTALwindow* window, CRYSTAL_PROPERTIES_STYLE style, CATALYST_RESULT* result) {
