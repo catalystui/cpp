@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-// Export API
+/* Export API */
 #if defined(_WIN32) || defined(__CYGWIN__)
     #if defined(CATMMLIB_EXPORTS)
         #define CATMMLIB_API __declspec(dllexport)

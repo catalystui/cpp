@@ -181,7 +181,7 @@
 // TODO: Document opcode 1 for failed to create NSWindow
 // TODO: Document opcode 2 for failed to create NSView
 // TODO: Document opcode 3 for failed to create delegate
-extern "C" CRYSTALwindow* crystalCreateWindow(catalyst::RESULT* result) {
+extern "C" CRYSTALwindow* crystalCreateWindow(CATALYST_RESULT* result) {
     @autoreleasepool {
         // Allocate the window object
         CRYSTALwindow* window;
@@ -288,7 +288,7 @@ extern "C" CRYSTALwindow* crystalCreateWindow(catalyst::RESULT* result) {
     }
 }
 
-void crystalProcessEvents(catalyst::BOOL wait) {
+void crystalProcessEvents(CATALYST_BOOL wait) {
     @autoreleasepool {
         NSDate* untilDate = wait ? [NSDate distantFuture] : [NSDate distantPast];
         NSApplication* nsApplication = [NSApplication sharedApplication];
@@ -313,7 +313,7 @@ void crystalProcessEvents(catalyst::BOOL wait) {
     }
 }
 
-extern "C" void crystalSetWindowTitle(CRYSTALwindow* window, catalyst::UTF8 title, catalyst::RESULT* result) {
+extern "C" void crystalSetWindowTitle(CRYSTALwindow* window, CATALYST_UTF8 title, CATALYST_RESULT* result) {
     @autoreleasepool {
         if (window == 0) {
             if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
@@ -348,7 +348,7 @@ extern "C" void crystalSetWindowTitle(CRYSTALwindow* window, catalyst::UTF8 titl
     }
 }
 
-extern "C" void crystalGetWindowTitle(CRYSTALwindow* window, catalyst::UTF8W title, catalyst::NUINT capacity, catalyst::NUINT* length, catalyst::RESULT* result) {
+extern "C" void crystalGetWindowTitle(CRYSTALwindow* window, CATALYST_UTF8W title, CATALYST_NUINT capacity, CATALYST_NUINT* length, CATALYST_RESULT* result) {
     if (window == 0) {
         if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
         return;
@@ -417,7 +417,7 @@ extern "C" void crystalGetWindowTitle(CRYSTALwindow* window, catalyst::UTF8W tit
 }
 
 // TODO: Document opcode 1 for failed to get NSScreen
-extern "C" void crystalSetWindowPosition(CRYSTALwindow* window, catalyst::NUINT x, catalyst::NUINT y, catalyst::RESULT* result) {
+extern "C" void crystalSetWindowPosition(CRYSTALwindow* window, CATALYST_NUINT x, CATALYST_NUINT y, CATALYST_RESULT* result) {
     @autoreleasepool {
         if (window == 0) {
             if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
@@ -456,7 +456,7 @@ extern "C" void crystalSetWindowPosition(CRYSTALwindow* window, catalyst::NUINT 
     }
 }
 
-extern "C" void crystalGetWindowPosition(CRYSTALwindow* window, catalyst::NUINT* x, catalyst::NUINT* y, catalyst::RESULT* result) {
+extern "C" void crystalGetWindowPosition(CRYSTALwindow* window, CATALYST_NUINT* x, CATALYST_NUINT* y, CATALYST_RESULT* result) {
     @autoreleasepool {
         if (window == 0) {
             if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
@@ -506,7 +506,7 @@ extern "C" void crystalGetWindowPosition(CRYSTALwindow* window, catalyst::NUINT*
     }
 }
 
-extern "C" void crystalSetWindowSize(CRYSTALwindow* window, catalyst::NUINT width, catalyst::NUINT height, catalyst::RESULT* result) {
+extern "C" void crystalSetWindowSize(CRYSTALwindow* window, CATALYST_NUINT width, CATALYST_NUINT height, CATALYST_RESULT* result) {
     @autoreleasepool {
         if (window == 0) {
             if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
@@ -568,7 +568,7 @@ extern "C" void crystalSetWindowSize(CRYSTALwindow* window, catalyst::NUINT widt
     }
 }
 
-extern "C" void crystalGetWindowSize(CRYSTALwindow* window, catalyst::NUINT* width, catalyst::NUINT* height, catalyst::RESULT* result) {
+extern "C" void crystalGetWindowSize(CRYSTALwindow* window, CATALYST_NUINT* width, CATALYST_NUINT* height, CATALYST_RESULT* result) {
     @autoreleasepool {
         if (window == 0) {
             if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
@@ -606,7 +606,7 @@ extern "C" void crystalGetWindowSize(CRYSTALwindow* window, catalyst::NUINT* wid
     }
 }
 
-extern "C" void crystalSetWindowSizeLimits(CRYSTALwindow* window, catalyst::NUINT minWidth, catalyst::NUINT minHeight, catalyst::NUINT maxWidth, catalyst::NUINT maxHeight, catalyst::RESULT* result) {
+extern "C" void crystalSetWindowSizeLimits(CRYSTALwindow* window, CATALYST_NUINT minWidth, CATALYST_NUINT minHeight, CATALYST_NUINT maxWidth, CATALYST_NUINT maxHeight, CATALYST_RESULT* result) {
     @autoreleasepool {
         if (window == 0) {
             if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
@@ -650,7 +650,7 @@ extern "C" void crystalSetWindowSizeLimits(CRYSTALwindow* window, catalyst::NUIN
     }
 }
 
-extern "C" void crystalGetWindowSizeLimits(CRYSTALwindow* window, catalyst::NUINT* minWidth, catalyst::NUINT* minHeight, catalyst::NUINT* maxWidth, catalyst::NUINT* maxHeight, catalyst::RESULT* result) {
+extern "C" void crystalGetWindowSizeLimits(CRYSTALwindow* window, CATALYST_NUINT* minWidth, CATALYST_NUINT* minHeight, CATALYST_NUINT* maxWidth, CATALYST_NUINT* maxHeight, CATALYST_RESULT* result) {
     @autoreleasepool {
         if (window == 0) {
             if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
@@ -703,7 +703,7 @@ extern "C" void crystalGetWindowSizeLimits(CRYSTALwindow* window, catalyst::NUIN
     }
 }
 
-extern "C" void crystalSetWindowStyle(CRYSTALwindow* window, CRYSTAL_PROPERTIES_STYLE style, catalyst::RESULT* result) {
+extern "C" void crystalSetWindowStyle(CRYSTALwindow* window, CRYSTAL_PROPERTIES_STYLE style, CATALYST_RESULT* result) {
     @autoreleasepool {
         if (window == 0) {
             if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
@@ -772,7 +772,7 @@ extern "C" void crystalSetWindowStyle(CRYSTALwindow* window, CRYSTAL_PROPERTIES_
     }
 }
 
-extern "C" void crystalGetWindowStyle(CRYSTALwindow* window, CRYSTAL_PROPERTIES_STYLE* style, catalyst::RESULT* result) {
+extern "C" void crystalGetWindowStyle(CRYSTALwindow* window, CRYSTAL_PROPERTIES_STYLE* style, CATALYST_RESULT* result) {
     @autoreleasepool {
         if (window == 0) {
             if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
@@ -821,7 +821,7 @@ extern "C" void crystalGetWindowStyle(CRYSTALwindow* window, CRYSTAL_PROPERTIES_
     }
 }
 
-extern "C" void crystalRequestWindowFocus(CRYSTALwindow* window, catalyst::RESULT* result) {
+extern "C" void crystalRequestWindowFocus(CRYSTALwindow* window, CATALYST_RESULT* result) {
     @autoreleasepool {
         if (window == 0) {
             if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
@@ -849,7 +849,7 @@ extern "C" void crystalRequestWindowFocus(CRYSTALwindow* window, catalyst::RESUL
     }
 }
 
-extern "C" void crystalRequestWindowAttention(CRYSTALwindow* window, catalyst::RESULT* result) {
+extern "C" void crystalRequestWindowAttention(CRYSTALwindow* window, CATALYST_RESULT* result) {
     @autoreleasepool {
         if (window == 0) {
             if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
@@ -869,7 +869,7 @@ extern "C" void crystalRequestWindowAttention(CRYSTALwindow* window, catalyst::R
     }
 }
 
-extern "C" void crystalMinimizeWindow(CRYSTALwindow* window, catalyst::RESULT* result) {
+extern "C" void crystalMinimizeWindow(CRYSTALwindow* window, CATALYST_RESULT* result) {
     @autoreleasepool {
         if (window == 0) {
             if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
@@ -895,7 +895,7 @@ extern "C" void crystalMinimizeWindow(CRYSTALwindow* window, catalyst::RESULT* r
     }
 }
 
-extern "C" void crystalMaximizeWindow(CRYSTALwindow* window, catalyst::RESULT* result) {
+extern "C" void crystalMaximizeWindow(CRYSTALwindow* window, CATALYST_RESULT* result) {
     @autoreleasepool {
         if (window == 0) {
             if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
@@ -928,7 +928,7 @@ extern "C" void crystalMaximizeWindow(CRYSTALwindow* window, catalyst::RESULT* r
     }
 }
 
-extern "C" void crystalRestoreWindow(CRYSTALwindow* window, catalyst::RESULT* result) {
+extern "C" void crystalRestoreWindow(CRYSTALwindow* window, CATALYST_RESULT* result) {
     @autoreleasepool {
         if (window == 0) {
             if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
@@ -961,7 +961,7 @@ extern "C" void crystalRestoreWindow(CRYSTALwindow* window, catalyst::RESULT* re
     }
 }
 
-extern "C" void crystalShowWindow(CRYSTALwindow* window, catalyst::RESULT* result) {
+extern "C" void crystalShowWindow(CRYSTALwindow* window, CATALYST_RESULT* result) {
     @autoreleasepool {
         if (window == 0) {
             if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
@@ -992,7 +992,7 @@ extern "C" void crystalShowWindow(CRYSTALwindow* window, catalyst::RESULT* resul
     }
 }
 
-extern "C" void crystalHideWindow(CRYSTALwindow* window, catalyst::RESULT* result) {
+extern "C" void crystalHideWindow(CRYSTALwindow* window, CATALYST_RESULT* result) {
     @autoreleasepool {
         if (window == 0) {
             if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
@@ -1071,7 +1071,7 @@ extern "C" void crystalGetWindowState(CRYSTALwindow* window, CRYSTAL_PROPERTIES_
     }
 }
 
-extern "C" void crystalCloseWindow(CRYSTALwindow* window, catalyst::RESULT* result) {
+extern "C" void crystalCloseWindow(CRYSTALwindow* window, CATALYST_RESULT* result) {
     @autoreleasepool {
         if (window == 0) {
             if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
@@ -1095,7 +1095,7 @@ extern "C" void crystalCloseWindow(CRYSTALwindow* window, catalyst::RESULT* resu
     }
 }
 
-extern "C" void crystalDestroyWindow(CRYSTALwindow* window, catalyst::RESULT* result) {
+extern "C" void crystalDestroyWindow(CRYSTALwindow* window, CATALYST_RESULT* result) {
     @autoreleasepool {
         if (window == 0) {
             if (result != 0) *result = catalyst::RESULT(catalyst::STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);

@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-// Export API
+/* Export API */
 #if defined(_WIN32) || defined(__CYGWIN__)
     #if defined(CRYSTAL_EXPORTS)
         #define CRYSTAL_API __declspec(dllexport)

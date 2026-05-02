@@ -3,7 +3,7 @@
 
 using namespace catalyst;
 
-void catteAsciiEncode(const CODEPOINT codepoint, ASCIIW asciiw, RESULT* result) {
+void catteAsciiEncode(const CATALYST_CODEPOINT codepoint, CATALYST_ASCIIW asciiw, CATALYST_RESULT* result) {
     // Validate, initialize parameters
     if (asciiw == 0) {
         if (result != 0) *result = RESULT(STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
@@ -31,7 +31,7 @@ void catteAsciiEncode(const CODEPOINT codepoint, ASCIIW asciiw, RESULT* result) 
     }
 }
 
-void catteAsciiDecode(ASCII ascii, CODEPOINT* codepoint, RESULT* result) {
+void catteAsciiDecode(CATALYST_ASCII ascii, CATALYST_CODEPOINT* codepoint, CATALYST_RESULT* result) {
     // Validate, initialize parameters
     if (ascii == 0) {
         if (result != 0) *result = RESULT(STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
@@ -51,7 +51,7 @@ void catteAsciiDecode(ASCII ascii, CODEPOINT* codepoint, RESULT* result) {
     if (result != 0) *result = RESULT(STATUS_CODE_SUCCESS, 0, 0, 0);
 }
 
-void catteAsciiLength(ASCII ascii, NUINT* length, RESULT* result) {
+void catteAsciiLength(CATALYST_ASCII ascii, CATALYST_NUINT* length, CATALYST_RESULT* result) {
     if (ascii == 0) {
         if (result != 0) *result = RESULT(STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
         return;
@@ -72,7 +72,7 @@ void catteAsciiLength(ASCII ascii, NUINT* length, RESULT* result) {
     if (result != 0) *result = RESULT(STATUS_CODE_SUCCESS, 0, 0, 0);
 }
 
-void catteCp1252Encode(const CODEPOINT codepoint, CP1252W cp1252w, RESULT* result) {
+void catteCp1252Encode(const CATALYST_CODEPOINT codepoint, CATALYST_CP1252W cp1252w, CATALYST_RESULT* result) {
     // Validate, initialize parameters
     if (cp1252w == 0) {
         if (result != 0) *result = RESULT(STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
@@ -150,7 +150,7 @@ void catteCp1252Encode(const CODEPOINT codepoint, CP1252W cp1252w, RESULT* resul
     return;
 }
 
-void catteCp1252Decode(CP1252 cp1252, CODEPOINT* codepoint, RESULT* result) {
+void catteCp1252Decode(CATALYST_CP1252 cp1252, CATALYST_CODEPOINT* codepoint, CATALYST_RESULT* result) {
     // Validate, initialize parameters
     if (cp1252 == 0) {
         if (result != 0) *result = RESULT(STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
@@ -212,7 +212,7 @@ void catteCp1252Decode(CP1252 cp1252, CODEPOINT* codepoint, RESULT* result) {
     return;
 }
 
-void catteCp1252Length(CP1252 cp1252, NUINT* length, RESULT* result) {
+void catteCp1252Length(CATALYST_CP1252 cp1252, CATALYST_NUINT* length, CATALYST_RESULT* result) {
     if (cp1252 == 0) {
         if (result != 0) *result = RESULT(STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
         return;
@@ -238,7 +238,7 @@ void catteCp1252Length(CP1252 cp1252, NUINT* length, RESULT* result) {
 // TODO: Document opcode 1 for overlong encoding
 // TODO: Document opcode 2 for invalid surrogate codepoint
 // TODO: Document opcode 3 for invalid codepoint
-void catteUtf8Encode(const CODEPOINT codepoint, UTF8W utf8w, NUINT* produced, RESULT* result) {
+void catteUtf8Encode(const CATALYST_CODEPOINT codepoint, CATALYST_UTF8W utf8w, CATALYST_NUINT* produced, CATALYST_RESULT* result) {
     // Validate, initialize parameters
     if (utf8w == 0) {
         if (result != 0) *result = RESULT(STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
@@ -329,7 +329,7 @@ void catteUtf8Encode(const CODEPOINT codepoint, UTF8W utf8w, NUINT* produced, RE
 // TODO: Document opcode 4 for invalid surrogate codepoint
 // TODO: Document opcode 5 for invalid codepoint
 // TODO: Document opcode 6 for invalid leading code unit
-void catteUtf8Decode(UTF8 utf8, CODEPOINT* codepoint, NUINT* consumed, RESULT* result) {
+void catteUtf8Decode(CATALYST_UTF8 utf8, CATALYST_CODEPOINT* codepoint, CATALYST_NUINT* consumed, CATALYST_RESULT* result) {
     // Validate, initialize parameters
     if (utf8 == 0) {
         if (result != 0) *result = RESULT(STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
@@ -482,7 +482,7 @@ void catteUtf8Decode(UTF8 utf8, CODEPOINT* codepoint, NUINT* consumed, RESULT* r
 }
 
 // TODO: Document opcode 1 for invalid UTF-8 sequence
-void catteUtf8Length(UTF8 utf8, NUINT* length, RESULT* result) {
+void catteUtf8Length(CATALYST_UTF8 utf8, CATALYST_NUINT* length, CATALYST_RESULT* result) {
     // Validate, initialize parameters
     if (utf8 == 0) {
         if (result != 0) *result = RESULT(STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
@@ -522,7 +522,7 @@ void catteUtf8Length(UTF8 utf8, NUINT* length, RESULT* result) {
 
 // TODO: Document opcode 1 for invalid codepoint above U+10FFFF
 // TODO: Document opcode 2 for invalid surrogate codepoint
-void catteUtf16leEncode(const CODEPOINT codepoint, UTF16LEW utf16lew, NUINT* produced, RESULT* result) {
+void catteUtf16leEncode(const CATALYST_CODEPOINT codepoint, CATALYST_UTF16LEW utf16lew, CATALYST_NUINT* produced, CATALYST_RESULT* result) {
     // Validate, initialize parameters
     if (utf16lew == 0) {
         if (result != 0) *result = RESULT(STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
@@ -583,7 +583,7 @@ void catteUtf16leEncode(const CODEPOINT codepoint, UTF16LEW utf16lew, NUINT* pro
 
 // TODO: Document opcode 1 for low surrogate without preceding high surrogate
 // TODO: Document opcode 2 for invalid low surrogate
-void catteUtf16leDecode(UTF16LE utf16le, CODEPOINT* codepoint, NUINT* consumed, RESULT* result) {
+void catteUtf16leDecode(CATALYST_UTF16LE utf16le, CATALYST_CODEPOINT* codepoint, CATALYST_NUINT* consumed, CATALYST_RESULT* result) {
     // Validate, initialize parameters
     if (utf16le == 0) {
         if (result != 0) *result = RESULT(STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
@@ -658,7 +658,7 @@ void catteUtf16leDecode(UTF16LE utf16le, CODEPOINT* codepoint, NUINT* consumed, 
 }
 
 // TODO: Document opcode 1 for invalid UTF-16LE sequence
-void catteUtf16leLength(UTF16LE utf16le, NUINT* length, RESULT* result) {
+void catteUtf16leLength(CATALYST_UTF16LE utf16le, CATALYST_NUINT* length, CATALYST_RESULT* result) {
     // Validate, initialize parameters
     if (utf16le == 0) {
         if (result != 0) *result = RESULT(STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
@@ -696,7 +696,7 @@ void catteUtf16leLength(UTF16LE utf16le, NUINT* length, RESULT* result) {
     if (result != 0) *result = RESULT(STATUS_CODE_SUCCESS, 0, 0, 0);
 }
 
-void catteAsciiToCp1252(ASCII ascii, CP1252W cp1252w, RESULT* result) {
+void catteAsciiToCp1252(CATALYST_ASCII ascii, CATALYST_CP1252W cp1252w, CATALYST_RESULT* result) {
     // Validate, initialize parameters
     if (ascii == 0) {
         if (result != 0) *result = RESULT(STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
@@ -728,7 +728,7 @@ void catteAsciiToCp1252(ASCII ascii, CP1252W cp1252w, RESULT* result) {
     if (result != 0) *result = RESULT(status, 0, 0, 0);
 }
 
-void catteAsciiToUtf8(ASCII ascii, UTF8W utf8w, NUINT capacity, RESULT* result) {
+void catteAsciiToUtf8(CATALYST_ASCII ascii, CATALYST_UTF8W utf8w, CATALYST_NUINT capacity, CATALYST_RESULT* result) {
     // Validate, initialize parameters
     if (ascii == 0) {
         if (result != 0) *result = RESULT(STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
@@ -768,7 +768,7 @@ void catteAsciiToUtf8(ASCII ascii, UTF8W utf8w, NUINT capacity, RESULT* result) 
     if (result != 0) *result = RESULT(status, 0, 0, 0);
 }
 
-void catteAsciiToUtf16le(ASCII ascii, UTF16LEW utf16lew, NUINT capacity, RESULT* result) {
+void catteAsciiToUtf16le(CATALYST_ASCII ascii, CATALYST_UTF16LEW utf16lew, CATALYST_NUINT capacity, CATALYST_RESULT* result) {
     // Validate, initialize parameters
     if (ascii == 0) {
         if (result != 0) *result = RESULT(STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
@@ -813,7 +813,7 @@ void catteAsciiToUtf16le(ASCII ascii, UTF16LEW utf16lew, NUINT capacity, RESULT*
 
 // TODO: Document opcode 1 for failed CP1252 decode
 // TODO: Document opcode 2 for failed ASCII encode
-void catteCp1252ToAscii(CP1252 cp1252, ASCIIW asciiw, RESULT* result) {
+void catteCp1252ToAscii(CATALYST_CP1252 cp1252, CATALYST_ASCIIW asciiw, CATALYST_RESULT* result) {
     // Validate, initialize parameters
     if (cp1252 == 0) {
         if (result != 0) *result = RESULT(STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
@@ -865,7 +865,7 @@ void catteCp1252ToAscii(CP1252 cp1252, ASCIIW asciiw, RESULT* result) {
 
 // TODO: Document opcode 1 for failed CP1252 decode
 // TODO: Document opcode 2 for failed UTF-8 encode
-void catteCp1252ToUtf8(CP1252 cp1252, UTF8W utf8w, NUINT capacity, RESULT* result) {
+void catteCp1252ToUtf8(CATALYST_CP1252 cp1252, CATALYST_UTF8W utf8w, CATALYST_NUINT capacity, CATALYST_RESULT* result) {
     // Validate, initialize parameters
     if (cp1252 == 0) {
         if (result != 0) *result = RESULT(STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
@@ -934,7 +934,7 @@ void catteCp1252ToUtf8(CP1252 cp1252, UTF8W utf8w, NUINT capacity, RESULT* resul
 
 // TODO: Document opcode 1 for failed CP1252 decode
 // TODO: Document opcode 2 for failed UTF-16LE encode
-void catteCp1252ToUtf16le(CP1252 cp1252, UTF16LEW utf16lew, NUINT capacity, RESULT* result) {
+void catteCp1252ToUtf16le(CATALYST_CP1252 cp1252, CATALYST_UTF16LEW utf16lew, CATALYST_NUINT capacity, CATALYST_RESULT* result) {
     // Validate, initialize parameters
     if (cp1252 == 0) {
         if (result != 0) *result = RESULT(STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
@@ -1004,7 +1004,7 @@ void catteCp1252ToUtf16le(CP1252 cp1252, UTF16LEW utf16lew, NUINT capacity, RESU
 
 // TODO: Document opcode 1 for failed UTF-8 decode
 // TODO: Document opcode 2 for failed ASCII encode
-void catteUtf8ToAscii(UTF8 utf8, ASCIIW asciiw, NUINT capacity, RESULT* result) {
+void catteUtf8ToAscii(CATALYST_UTF8 utf8, CATALYST_ASCIIW asciiw, CATALYST_NUINT capacity, CATALYST_RESULT* result) {
     // Validate, initialize parameters
     if (utf8 == 0) {
         if (result != 0) *result = RESULT(STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
@@ -1068,7 +1068,7 @@ void catteUtf8ToAscii(UTF8 utf8, ASCIIW asciiw, NUINT capacity, RESULT* result) 
 
 // TODO: Document opcode 1 for failed UTF-8 decode
 // TODO: Document opcode 2 for failed CP1252 encode
-void catteUtf8ToCp1252(UTF8 utf8, CP1252W cp1252w, NUINT capacity, RESULT* result) {
+void catteUtf8ToCp1252(CATALYST_UTF8 utf8, CATALYST_CP1252W cp1252w, CATALYST_NUINT capacity, CATALYST_RESULT* result) {
     // Validate, initialize parameters
     if (utf8 == 0) {
         if (result != 0) *result = RESULT(STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
@@ -1132,7 +1132,7 @@ void catteUtf8ToCp1252(UTF8 utf8, CP1252W cp1252w, NUINT capacity, RESULT* resul
 
 // TODO: Document opcode 1 for failed UTF-8 decode
 // TODO: Document opcode 2 for failed UTF-16LE encode
-void catteUtf8ToUtf16le(UTF8 utf8, UTF16LEW utf16lew, NUINT capacity, RESULT* result) {
+void catteUtf8ToUtf16le(CATALYST_UTF8 utf8, CATALYST_UTF16LEW utf16lew, CATALYST_NUINT capacity, CATALYST_RESULT* result) {
     // Validate, initialize parameters
     if (utf8 == 0) {
         if (result != 0) *result = RESULT(STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
@@ -1207,7 +1207,7 @@ void catteUtf8ToUtf16le(UTF8 utf8, UTF16LEW utf16lew, NUINT capacity, RESULT* re
 
 // TODO: Document opcode 1 for failed UTF-16LE decode
 // TODO: Document opcode 2 for failed ASCII encode
-void catteUtf16leToAscii(UTF16LE utf16le, ASCIIW asciiw, NUINT capacity, RESULT* result) {
+void catteUtf16leToAscii(CATALYST_UTF16LE utf16le, CATALYST_ASCIIW asciiw, CATALYST_NUINT capacity, CATALYST_RESULT* result) {
     // Validate, initialize parameters
     if (utf16le == 0) {
         if (result != 0) *result = RESULT(STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
@@ -1271,7 +1271,7 @@ void catteUtf16leToAscii(UTF16LE utf16le, ASCIIW asciiw, NUINT capacity, RESULT*
 
 // TODO: Document opcode 1 for failed UTF-16LE decode
 // TODO: Document opcode 2 for failed CP1252 encode
-void catteUtf16leToCp1252(UTF16LE utf16le, CP1252W cp1252w, NUINT capacity, RESULT* result) {
+void catteUtf16leToCp1252(CATALYST_UTF16LE utf16le, CATALYST_CP1252W cp1252w, CATALYST_NUINT capacity, CATALYST_RESULT* result) {
     // Validate, initialize parameters
     if (utf16le == 0) {
         if (result != 0) *result = RESULT(STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
@@ -1335,7 +1335,7 @@ void catteUtf16leToCp1252(UTF16LE utf16le, CP1252W cp1252w, NUINT capacity, RESU
 
 // TODO: Document opcode 1 for failed UTF-16LE decode
 // TODO: Document opcode 2 for failed UTF-8 encode
-void catteUtf16leToUtf8(UTF16LE utf16le, UTF8W utf8w, NUINT capacity, RESULT* result) {
+void catteUtf16leToUtf8(CATALYST_UTF16LE utf16le, CATALYST_UTF8W utf8w, CATALYST_NUINT capacity, CATALYST_RESULT* result) {
     // Validate, initialize parameters
     if (utf16le == 0) {
         if (result != 0) *result = RESULT(STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);

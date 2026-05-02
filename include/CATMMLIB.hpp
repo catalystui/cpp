@@ -4,7 +4,7 @@
 #include "CATMMLIB.h"
 namespace catalyst {
 
-typedef CATALYST_MEMORY_HEADER MEMORY_HEADER;
+typedef ::CATALYST_MEMORY_HEADER MEMORY_HEADER;
 
 inline void alloc(void** memory, NUINT size, RESULT* result) {
     ::catmmAlloc(memory, size, result);

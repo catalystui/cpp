@@ -108,19 +108,8 @@ typedef CATALYST_UTF8_CODE_UNIT* CATALYST_UTF8W;
 typedef const CATALYST_UTF8_CODE_UNIT* CATALYST_UTF8;
 
 typedef struct CATALYST_UTF16LE_CODE_UNIT {
-    CATALYST_BYTE lsb; /* Least significant byte of the codepoint. */
-    CATALYST_BYTE msb; /* Most significant byte of the codepoint. */
-
-    #if defined(__cplusplus)
-        CATALYST_CONSTEXPR CATALYST_UTF16LE_CODE_UNIT() : msb(0), lsb(0) {}
-        CATALYST_CONSTEXPR CATALYST_UTF16LE_CODE_UNIT(CATALYST_BYTE msb, CATALYST_BYTE lsb) : msb(msb), lsb(lsb) {}
-        #if CATCRLIB_SUPPORTS_16BIT
-            explicit CATALYST_CONSTEXPR CATALYST_UTF16LE_CODE_UNIT(CATALYST_USHORT value) : msb((CATALYST_BYTE) ((value >> 8) & (CATALYST_USHORT) 0x00FFu)), lsb((CATALYST_BYTE) (value & (CATALYST_USHORT) 0x00FFu)) {}
-            CATALYST_CONSTEXPR operator CATALYST_USHORT() const {
-                return ((CATALYST_USHORT) msb << 8) | (CATALYST_USHORT) lsb;
-            }
-        #endif
-    #endif
+    CATALYST_BYTE lsb; /* Low byte of the UTF-16 code unit; first byte in UTF-16LE storage. */
+    CATALYST_BYTE msb; /* High byte of the UTF-16 code unit; second byte in UTF-16LE storage. */
 } CATALYST_UTF16LE_CODE_UNIT;
 typedef CATALYST_UTF16LE_CODE_UNIT* CATALYST_UTF16LEW;
 typedef const CATALYST_UTF16LE_CODE_UNIT* CATALYST_UTF16LE;
@@ -174,17 +163,6 @@ typedef struct CATALYST_RESULT {
     CATALYST_CONTEXT_CODE context;
     CATALYST_OPERATION_CODE operation;
     CATALYST_DETAIL_CODE detail;
-
-    #if defined(__cplusplus)
-        CATALYST_CONSTEXPR CATALYST_RESULT() : status(CATALYST_STATUS_CODE_SUCCESS), context(0x00), operation(0x00), detail(0x00) {}
-        CATALYST_CONSTEXPR CATALYST_RESULT(CATALYST_STATUS_CODE status, CATALYST_CONTEXT_CODE context, CATALYST_OPERATION_CODE operation, CATALYST_DETAIL_CODE detail) : status(status), context(context), operation(operation), detail(detail) {}
-        #if CATCRLIB_SUPPORTS_32BIT
-            explicit CATALYST_CONSTEXPR CATALYST_RESULT(CATALYST_UINT value) : status((CATALYST_STATUS_CODE) ((value >> 24) & (CATALYST_UINT) 0x000000FFu)), context((CATALYST_CONTEXT_CODE) ((value >> 16) & (CATALYST_UINT) 0x000000FFu)), operation((CATALYST_OPERATION_CODE) ((value >> 8) & (CATALYST_UINT) 0x000000FFu)), detail((CATALYST_DETAIL_CODE) (value & (CATALYST_UINT) 0x000000FFu)) {}
-            CATALYST_CONSTEXPR operator CATALYST_UINT() const {
-                return ((CATALYST_UINT) status << 24) | ((CATALYST_UINT) context << 16) | ((CATALYST_UINT) operation << 8) | (CATALYST_UINT) detail;
-            }
-        #endif
-    #endif
 } CATALYST_RESULT;
 
 #endif /* CATCRLIB_H */

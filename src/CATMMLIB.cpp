@@ -3,7 +3,7 @@
 
 using namespace catalyst;
 
-void catmmRealloc(void** memory, NUINT size, RESULT* result) {
+void catmmRealloc(void** memory, CATALYST_NUINT size, CATALYST_RESULT* result) {
     // Validate, initialize parameters
     if (memory == 0) {
         if (result != 0) *result = RESULT(STATUS_CODE_ERROR_INVALID_ARGUMENT, 0, 0, 0);
