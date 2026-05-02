@@ -426,7 +426,7 @@ extern "C" CRYSTALwindow* crystalCreateWindow(CATALYST_RESULT* result) {
     return window;
 }
 
-void crystalProcessEvents(CATALYST_BOOL wait) {
+extern "C" void crystalProcessEvents(catalyst::BOOL wait) {
     MSG message;
     if (wait && !PeekMessage(&message, 0, 0, 0, PM_NOREMOVE)) {
         WaitMessage();

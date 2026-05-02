@@ -288,7 +288,7 @@ extern "C" CRYSTALwindow* crystalCreateWindow(CATALYST_RESULT* result) {
     }
 }
 
-void crystalProcessEvents(CATALYST_BOOL wait) {
+extern "C" void crystalProcessEvents(catalyst::BOOL wait) {
     @autoreleasepool {
         NSDate* untilDate = wait ? [NSDate distantFuture] : [NSDate distantPast];
         NSApplication* nsApplication = [NSApplication sharedApplication];

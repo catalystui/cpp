@@ -10,6 +10,11 @@ struct AppState {
 static AppState appState;
 static int failed = 0;
 
+enum {
+    WAIT_ATTEMPTS = 500,
+    STABLE_READS = 2
+};
+
 static void printResult(const char* name, CATALYST_RESULT result) {
     printf(
         "%s -> status=0x%02X context=0x%02X operation=0x%02X detail=0x%02X\n",
@@ -34,7 +39,7 @@ static void fail(const char* name, CATALYST_RESULT result) {
 static void drainEvents() {
     int i;
 
-    for (i = 0; i < 10; i += 1) {
+    for (i = 0; i < 25; i += 1) {
         crystalPollEvents();
     }
 }
@@ -149,6 +154,42 @@ static void failSizeMismatch(
     failed += 1;
 }
 
+static int waitForSize(
+    CRYSTALwindow* window,
+    CATALYST_NUINT expectedWidth,
+    CATALYST_NUINT expectedHeight,
+    CATALYST_NUINT* actualWidth,
+    CATALYST_NUINT* actualHeight,
+    CATALYST_RESULT* result
+) {
+    int i;
+    int stable;
+
+    stable = 0;
+
+    for (i = 0; i < WAIT_ATTEMPTS; i += 1) {
+        crystalPollEvents();
+
+        crystalGetWindowSize(window, actualWidth, actualHeight, result);
+
+        if (result->status != CATALYST_STATUS_CODE_SUCCESS) {
+            return 0;
+        }
+
+        if (*actualWidth == expectedWidth && *actualHeight == expectedHeight) {
+            stable += 1;
+
+            if (stable >= STABLE_READS) {
+                return 1;
+            }
+        } else {
+            stable = 0;
+        }
+    }
+
+    return 0;
+}
+
 static void testSizeLimits(
     CRYSTALwindow* window,
     const char* name,
@@ -250,16 +291,12 @@ static void testSizeAfterLimits(
         return;
     }
 
-    drainEvents();
+    if (!waitForSize(window, expectedWidth, expectedHeight, &actualWidth, &actualHeight, &result)) {
+        if (result.status != CATALYST_STATUS_CODE_SUCCESS) {
+            fail(name, result);
+            return;
+        }
 
-    crystalGetWindowSize(window, &actualWidth, &actualHeight, &result);
-
-    if (result.status != CATALYST_STATUS_CODE_SUCCESS) {
-        fail(name, result);
-        return;
-    }
-
-    if (actualWidth != expectedWidth || actualHeight != expectedHeight) {
         failSizeMismatch(
             name,
             requestedWidth,
@@ -291,6 +328,8 @@ static int readCurrentSize(
 
     *width = 0;
     *height = 0;
+
+    drainEvents();
 
     crystalGetWindowSize(window, width, height, &result);
 

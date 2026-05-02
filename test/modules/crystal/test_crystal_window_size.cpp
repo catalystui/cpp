@@ -10,6 +10,11 @@ struct AppState {
 static AppState appState;
 static int failed = 0;
 
+enum {
+    WAIT_ATTEMPTS = 500,
+    STABLE_READS = 2
+};
+
 static void printResult(const char* name, CATALYST_RESULT result) {
     printf(
         "%s -> status=0x%02X context=0x%02X operation=0x%02X detail=0x%02X\n",
@@ -45,7 +50,7 @@ static void waitForEnter(const char* message) {
 static void drainEvents() {
     int i;
 
-    for (i = 0; i < 10; i += 1) {
+    for (i = 0; i < 25; i += 1) {
         crystalPollEvents();
     }
 }
@@ -124,6 +129,42 @@ static void failSizeMismatch(
     failed += 1;
 }
 
+static int waitForSize(
+    CRYSTALwindow* window,
+    CATALYST_NUINT expectedWidth,
+    CATALYST_NUINT expectedHeight,
+    CATALYST_NUINT* actualWidth,
+    CATALYST_NUINT* actualHeight,
+    CATALYST_RESULT* result
+) {
+    int i;
+    int stable;
+
+    stable = 0;
+
+    for (i = 0; i < WAIT_ATTEMPTS; i += 1) {
+        crystalPollEvents();
+
+        crystalGetWindowSize(window, actualWidth, actualHeight, result);
+
+        if (result->status != CATALYST_STATUS_CODE_SUCCESS) {
+            return 0;
+        }
+
+        if (*actualWidth == expectedWidth && *actualHeight == expectedHeight) {
+            stable += 1;
+
+            if (stable >= STABLE_READS) {
+                return 1;
+            }
+        } else {
+            stable = 0;
+        }
+    }
+
+    return 0;
+}
+
 static void testSize(
     CRYSTALwindow* window,
     const char* name,
@@ -144,16 +185,12 @@ static void testSize(
         return;
     }
 
-    drainEvents();
+    if (!waitForSize(window, expectedWidth, expectedHeight, &actualWidth, &actualHeight, &result)) {
+        if (result.status != CATALYST_STATUS_CODE_SUCCESS) {
+            fail(name, result);
+            return;
+        }
 
-    crystalGetWindowSize(window, &actualWidth, &actualHeight, &result);
-
-    if (result.status != CATALYST_STATUS_CODE_SUCCESS) {
-        fail(name, result);
-        return;
-    }
-
-    if (actualWidth != expectedWidth || actualHeight != expectedHeight) {
         failSizeMismatch(name, expectedWidth, expectedHeight, actualWidth, actualHeight);
         return;
     }
@@ -175,6 +212,8 @@ static int readCurrentSize(
 
     *width = 0;
     *height = 0;
+
+    drainEvents();
 
     crystalGetWindowSize(window, width, height, &result);
 
@@ -262,44 +301,19 @@ int main() {
     );
 
     waitForEnter("Press Enter to resize the window to half its initial size...");
-    testSize(
-        window,
-        "crystalSet/GetWindowSize half initial size",
-        halfWidth,
-        halfHeight
-    );
+    testSize(window, "crystalSet/GetWindowSize half initial size", halfWidth, halfHeight);
 
     waitForEnter("Inspect the smaller window, then press Enter to resize it to three-quarter size...");
-    testSize(
-        window,
-        "crystalSet/GetWindowSize three-quarter initial size",
-        threeQuarterWidth,
-        threeQuarterHeight
-    );
+    testSize(window, "crystalSet/GetWindowSize three-quarter initial size", threeQuarterWidth, threeQuarterHeight);
 
     waitForEnter("Inspect the window size, then press Enter to resize it back to initial size...");
-    testSize(
-        window,
-        "crystalSet/GetWindowSize initial size",
-        baseWidth,
-        baseHeight
-    );
+    testSize(window, "crystalSet/GetWindowSize initial size", baseWidth, baseHeight);
 
     waitForEnter("Inspect the window size, then press Enter to resize it to 1.25x initial size...");
-    testSize(
-        window,
-        "crystalSet/GetWindowSize 1.25x initial size",
-        fiveQuarterWidth,
-        fiveQuarterHeight
-    );
+    testSize(window, "crystalSet/GetWindowSize 1.25x initial size", fiveQuarterWidth, fiveQuarterHeight);
 
     waitForEnter("Inspect the window size, then press Enter to resize it to 1.5x initial size...");
-    testSize(
-        window,
-        "crystalSet/GetWindowSize 1.5x initial size",
-        largeWidth,
-        largeHeight
-    );
+    testSize(window, "crystalSet/GetWindowSize 1.5x initial size", largeWidth, largeHeight);
 
     waitForEnter("Inspect the final window size, then press Enter to destroy the window...");
 
