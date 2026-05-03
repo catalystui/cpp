@@ -145,6 +145,7 @@ function(configure_target)
         string(TOLOWER "${ARG_SUBDIR}" ARG_SUBDIR_LOWER)
     endif()
     foreach(TARGET_NAME ${ARG_TARGETS})
+        # Set output name and folder if specified
         if(NOT "${ARG_NAME}" STREQUAL "")
             set(CONFIGURE_OUTPUT_NAME "${ARG_NAME}")
             if(TARGET_PLATFORM_DARWIN OR TARGET_PLATFORM_LINUX)
@@ -159,6 +160,8 @@ function(configure_target)
                 FOLDER "${ARG_FOLDER}"
             )
         endif()
+
+        # Set output subdirectory if specified
         get_target_property(CONFIGURE_TARGET_TYPE ${TARGET_NAME} TYPE)
         if(NOT "${ARG_SUBDIR_LOWER}" STREQUAL "")
             if(CONFIGURE_TARGET_TYPE STREQUAL "EXECUTABLE")
@@ -187,10 +190,12 @@ function(configure_target)
             endif()
         endif()
 
+        # Add sources and dependencies if specified
         if(ARG_SOURCES)
             target_sources(${TARGET_NAME} PRIVATE ${ARG_SOURCES})
         endif()
 
+        # Link dependencies if specified
         if(ARG_DEPENDS)
             target_link_libraries(${TARGET_NAME} PRIVATE ${ARG_DEPENDS})
         endif()
@@ -280,4 +285,55 @@ function(define config_file_name config_header_name)
     else()
         message(WARNING "Configuration file '${config_file_name}' not found, skipping generation of '${config_header_name}'")
     endif()
+endfunction()
+
+function(define_wayland_protocol protocol_xml protocol_header_name protocol_source_name)
+    find_program(WAYLAND_SCANNER wayland-scanner REQUIRED)
+    if(NOT EXISTS "${protocol_xml}")
+        message(FATAL_ERROR "Wayland protocol XML not found: '${protocol_xml}'")
+    endif()
+    set(GENERATED_REAL_DIR "${CMAKE_BINARY_DIR}/generated")
+    set(GENERATED_REAL_HEADER "${GENERATED_REAL_DIR}/${protocol_header_name}")
+    set(GENERATED_REAL_SOURCE "${GENERATED_REAL_DIR}/${protocol_source_name}")
+    get_filename_component(BINARY_PARENT_DIR "${CMAKE_BINARY_DIR}" DIRECTORY)
+    set(GENERATED_LINK_DIR "${BINARY_PARENT_DIR}/generated")
+    set(GENERATED_LINK_HEADER "${GENERATED_LINK_DIR}/${protocol_header_name}")
+    set(GENERATED_LINK_SOURCE "${GENERATED_LINK_DIR}/${protocol_source_name}")
+    file(MAKE_DIRECTORY "${GENERATED_REAL_DIR}")
+    file(MAKE_DIRECTORY "${GENERATED_LINK_DIR}")
+    execute_process(
+        COMMAND "${WAYLAND_SCANNER}" client-header "${protocol_xml}" "${GENERATED_REAL_HEADER}"
+        RESULT_VARIABLE WAYLAND_HEADER_RESULT
+    )
+    if(NOT WAYLAND_HEADER_RESULT EQUAL 0)
+        message(FATAL_ERROR "Failed to generate Wayland header '${GENERATED_REAL_HEADER}' from '${protocol_xml}'")
+    endif()
+    execute_process(
+        COMMAND "${WAYLAND_SCANNER}" private-code "${protocol_xml}" "${GENERATED_REAL_SOURCE}"
+        RESULT_VARIABLE WAYLAND_SOURCE_RESULT
+    )
+    if(NOT WAYLAND_SOURCE_RESULT EQUAL 0)
+        message(FATAL_ERROR "Failed to generate Wayland source '${GENERATED_REAL_SOURCE}' from '${protocol_xml}'")
+    endif()
+    file(REMOVE "${GENERATED_LINK_HEADER}")
+    file(CREATE_LINK
+        "${GENERATED_REAL_HEADER}"
+        "${GENERATED_LINK_HEADER}"
+        SYMBOLIC
+        COPY_ON_ERROR
+    )
+    file(REMOVE "${GENERATED_LINK_SOURCE}")
+    file(CREATE_LINK
+        "${GENERATED_REAL_SOURCE}"
+        "${GENERATED_LINK_SOURCE}"
+        SYMBOLIC
+        COPY_ON_ERROR
+    )
+    include_directories("${GENERATED_LINK_DIR}")
+    set(WAYLAND_PROTOCOL_HEADER "${GENERATED_LINK_HEADER}" PARENT_SCOPE)
+    set(WAYLAND_PROTOCOL_SOURCE "${GENERATED_LINK_SOURCE}" PARENT_SCOPE)
+    message(STATUS "Generated Wayland header '${GENERATED_REAL_HEADER}'")
+    message(STATUS "Generated Wayland source '${GENERATED_REAL_SOURCE}'")
+    message(STATUS "Linked Wayland header to '${GENERATED_LINK_HEADER}'")
+    message(STATUS "Linked Wayland source to '${GENERATED_LINK_SOURCE}'")
 endfunction()

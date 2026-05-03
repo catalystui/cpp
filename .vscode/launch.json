@@ -1,0 +1,11 @@
+{
+    "configurations": [
+        {
+            "type": "by-gdb",
+            "request": "launch",
+            "name": "Debug (gdb)",
+            "program": "${command:cmake.launchTargetPath}",
+            "cwd": "${workspaceRoot}"
+        }
+    ]
+}

@@ -204,30 +204,28 @@ static BOOL crystalInitializeBackend(CRYSTAL_DISPLAY_SERVER displayServer, CATAL
     }
 #else
     if (displayServer == CRYSTAL_DISPLAY_SERVER_WAYLAND) {
-    //     backendCreateWindow = crystalCreateWindowWayland;
-    //     backendProcessEvents = crystalProcessEventsWayland;
-    //     backendSetWindowTitle = crystalSetWindowTitleWayland;
-    //     backendGetWindowTitle = crystalGetWindowTitleWayland;
-    //     backendSetWindowPosition = crystalSetWindowPositionWayland;
-    //     backendGetWindowPosition = crystalGetWindowPositionWayland;
-    //     backendSetWindowSize = crystalSetWindowSizeWayland;
-    //     backendGetWindowSize = crystalGetWindowSizeWayland;
-    //     backendSetWindowSizeLimits = crystalSetWindowSizeLimitsWayland;
-    //     backendGetWindowSizeLimits = crystalGetWindowSizeLimitsWayland;
-    //     backendSetWindowStyle = crystalSetWindowStyleWayland;
-    //     backendGetWindowStyle = crystalGetWindowStyleWayland;
-    //     backendRequestWindowFocus = crystalRequestWindowFocusWayland;
-    //     backendRequestWindowAttention = crystalRequestWindowAttentionWayland;
-    //     backendMinimizeWindow = crystalMinimizeWindowWayland;
-    //     backendMaximizeWindow = crystalMaximizeWindowWayland;
-    //     backendRestoreWindow = crystalRestoreWindowWayland;
-    //     backendShowWindow = crystalShowWindowWayland;
-    //     backendHideWindow = crystalHideWindowWayland;
-    //     backendGetWindowState = crystalGetWindowStateWayland;
-    //     backendCloseWindow = crystalCloseWindowWayland;
-    //     backendDestroyWindow = crystalDestroyWindowWayland;
-        *result = RESULT(STATUS_CODE_ERROR_NOT_IMPLEMENTED, 0, 0, 0);
-        return FALSE; // Wayland backend not implemented yet
+        backendCreateWindow = crystalCreateWindowWayland;
+        backendProcessEvents = crystalProcessEventsWayland;
+        backendSetWindowTitle = crystalSetWindowTitleWayland;
+        backendGetWindowTitle = crystalGetWindowTitleWayland;
+        backendSetWindowPosition = crystalSetWindowPositionWayland;
+        backendGetWindowPosition = crystalGetWindowPositionWayland;
+        backendSetWindowSize = crystalSetWindowSizeWayland;
+        backendGetWindowSize = crystalGetWindowSizeWayland;
+        backendSetWindowSizeLimits = crystalSetWindowSizeLimitsWayland;
+        backendGetWindowSizeLimits = crystalGetWindowSizeLimitsWayland;
+        backendSetWindowStyle = crystalSetWindowStyleWayland;
+        backendGetWindowStyle = crystalGetWindowStyleWayland;
+        backendRequestWindowFocus = crystalRequestWindowFocusWayland;
+        backendRequestWindowAttention = crystalRequestWindowAttentionWayland;
+        backendMinimizeWindow = crystalMinimizeWindowWayland;
+        backendMaximizeWindow = crystalMaximizeWindowWayland;
+        backendRestoreWindow = crystalRestoreWindowWayland;
+        backendShowWindow = crystalShowWindowWayland;
+        backendHideWindow = crystalHideWindowWayland;
+        backendGetWindowState = crystalGetWindowStateWayland;
+        backendCloseWindow = crystalCloseWindowWayland;
+        backendDestroyWindow = crystalDestroyWindowWayland;
     } else if (displayServer == CRYSTAL_DISPLAY_SERVER_X11) {
         backendCreateWindow = crystalCreateWindowX11;
         backendProcessEvents = crystalProcessEventsX11;

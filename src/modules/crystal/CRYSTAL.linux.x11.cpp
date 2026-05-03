@@ -387,7 +387,7 @@ CRYSTALwindow* crystalCreateWindowX11(CATALYST_RESULT* result) {
     // Assign native handles
     window->native.primary = (catalyst::NUINT) xwindow;
     window->native.secondary = (catalyst::NUINT) crystalX11Display;
-    window->native.tertiary = 0;
+    window->native.tertiary = 0; // TODO: graphical thing???
     window->platform = platform;
 
     // Apply initial window-manager hints

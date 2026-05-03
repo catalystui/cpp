@@ -9,7 +9,31 @@ define("CMakeConfig.h" "CMAKECFG.h")
 
 # DARWIN platform specifics
 if(TARGET_PLATFORM_DARWIN)
+    # Enable Objective-C and Objective-C++
     enable_language(OBJC OBJCXX)
+elseif(TARGET_PLATFORM_LINUX)
+    # Enable X11 support
+    find_package(X11 REQUIRED)
+
+    # Enable Wayland support
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(WAYLAND_CLIENT REQUIRED IMPORTED_TARGET wayland-client)
+    pkg_check_modules(WAYLAND_PROTOCOLS REQUIRED wayland-protocols)
+    pkg_get_variable(WAYLAND_PROTOCOLS_DIR wayland-protocols pkgdatadir)
+    define_wayland_protocol(
+        "${WAYLAND_PROTOCOLS_DIR}/stable/xdg-shell/xdg-shell.xml"
+        "xdg-shell-client-protocol.h"
+        "xdg-shell-client-protocol.c"
+    )
+    set(WAYLAND_XDG_SHELL_HEADER "${WAYLAND_PROTOCOL_HEADER}")
+    set(WAYLAND_XDG_SHELL_SOURCE "${WAYLAND_PROTOCOL_SOURCE}")
+    define_wayland_protocol(
+        "${WAYLAND_PROTOCOLS_DIR}/unstable/xdg-decoration/xdg-decoration-unstable-v1.xml"
+        "xdg-decoration-unstable-v1-client-protocol.h"
+        "xdg-decoration-unstable-v1-client-protocol.c"
+    )
+    set(WAYLAND_XDG_DECORATION_HEADER "${WAYLAND_PROTOCOL_HEADER}")
+    set(WAYLAND_XDG_DECORATION_SOURCE "${WAYLAND_PROTOCOL_SOURCE}")
 endif()
 
 #######################
@@ -83,7 +107,6 @@ elseif(TARGET_PLATFORM_WIN32)
             src/modules/crystal/CRYSTAL.win32.cpp
     )
 elseif(TARGET_PLATFORM_LINUX)
-    find_package(X11 REQUIRED)
     add_library(CRYSTAL_X11_SHARED SHARED)
     add_library(CRYSTAL_X11_STATIC STATIC)
     configure_target(
@@ -96,37 +119,31 @@ elseif(TARGET_PLATFORM_LINUX)
             CATTELIB_SHARED
             "X11::X11"
     )
-    add_dependencies(CRYSTAL_SHARED CRYSTAL_X11_SHARED)
-    add_dependencies(CRYSTAL_STATIC CRYSTAL_X11_STATIC)
 
-    # find_package(Wayland REQUIRED)
-    # add_library(CRYSTAL_WAYLAND_SHARED SHARED)
-    # add_library(CRYSTAL_WAYLAND_STATIC STATIC)
-    # configure_target(
-    #     NAME CRYSTAL-wayland
-    #     TARGETS CRYSTAL_WAYLAND_SHARED CRYSTAL_WAYLAND_STATIC
-    #     SOURCES
-    #         src/modules/crystal/CRYSTAL.wayland.cpp
-    #     DEPENDS
-    #         CATMMLIB_SHARED
-    #         CATTELIB_SHARED
-    #         "Wayland::Wayland"
-    # )
-    # add_dependencies(CRYSTAL_SHARED CRYSTAL_WAYLAND_SHARED)
-    # add_dependencies(CRYSTAL_STATIC CRYSTAL_WAYLAND_STATIC)
-
+    add_library(CRYSTAL_WAYLAND_SHARED SHARED)
+    add_library(CRYSTAL_WAYLAND_STATIC STATIC)
     configure_target(
-        TARGETS CRYSTAL_SHARED
+        NAME CRYSTAL-wayland
+        TARGETS CRYSTAL_WAYLAND_SHARED CRYSTAL_WAYLAND_STATIC
         SOURCES
-            src/modules/crystal/CRYSTAL.linux.cpp
+            src/modules/crystal/CRYSTAL.linux.wayland.cpp
+            "${WAYLAND_XDG_SHELL_SOURCE}"
+            "${WAYLAND_XDG_SHELL_HEADER}"
+            "${WAYLAND_XDG_DECORATION_SOURCE}"
+            "${WAYLAND_XDG_DECORATION_HEADER}"
+        DEPENDS
+            CATMMLIB_SHARED
+            CATTELIB_SHARED
+            "PkgConfig::WAYLAND_CLIENT"
     )
+
     configure_target(
-        TARGETS CRYSTAL_STATIC
+        TARGETS CRYSTAL_SHARED CRYSTAL_STATIC
         SOURCES
             src/modules/crystal/CRYSTAL.linux.cpp
         DEPENDS
-            CRYSTAL_X11_STATIC
-            # CRYSTAL_WAYLAND_STATIC
+            CRYSTAL_X11_SHARED
+            CRYSTAL_WAYLAND_SHARED
     )
 else()
     message(WARNING "No platform-specific source files configured for CRYSTAL!")
@@ -172,7 +189,7 @@ if(EXISTS "${CMAKE_SOURCE_DIR}/test")
                             CATTELIB_SHARED
                             CRYSTAL_SHARED
                     )
-                    message(STATUS "Configured ${TEST_NAME}_SHARED as a Linux GUI application")
+                    message(STATUS "Configured ${TEST_NAME}_shared as a Linux GUI application")
                 endif()
             endif()
             if(MSVC)
