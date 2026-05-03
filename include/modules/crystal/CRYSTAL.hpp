@@ -27,6 +27,12 @@ static const PROPERTIES_STATE PROPERTIES_STATE_MAXIMIZED = CRYSTAL_PROPERTIES_ST
 static const PROPERTIES_STATE PROPERTIES_STATE_VISIBLE = CRYSTAL_PROPERTIES_STATE_VISIBLE;
 static const PROPERTIES_STATE PROPERTIES_STATE_HIDDEN = CRYSTAL_PROPERTIES_STATE_HIDDEN;
 
+typedef ::CRYSTAL_CONTENT_MODE CONTENT_MODE;
+
+static const CONTENT_MODE CONTENT_MODE_DEFAULT = CRYSTAL_CONTENT_MODE_DEFAULT;
+static const CONTENT_MODE CONTENT_MODE_INTERNAL = CRYSTAL_CONTENT_MODE_INTERNAL;
+static const CONTENT_MODE CONTENT_MODE_EXTERNAL = CRYSTAL_CONTENT_MODE_EXTERNAL;
+
 typedef ::CRYSTALwindowErroredCallback windowErroredCallback;
 typedef ::CRYSTALwindowRepositionedCallback windowRepositionedCallback;
 typedef ::CRYSTALwindowResizedCallback windowResizedCallback;
@@ -92,6 +98,16 @@ inline void setWindowStyle(window* window, CRYSTAL_PROPERTIES_STYLE style, RESUL
 inline void getWindowStyle(window* window, CRYSTAL_PROPERTIES_STYLE* style, RESULT* result) {
     ::crystalGetWindowStyle(window, style, result);
 }
+
+/*
+inline void setWindowContentMode(window* window, CONTENT_MODE mode, RESULT* result) {
+    ::crystalSetWindowContentMode(window, mode, result);
+}
+
+inline void getWindowContentMode(window* window, CONTENT_MODE* mode, RESULT* result) {
+    ::crystalGetWindowContentMode(window, mode, result);
+}
+*/
 
 inline void requestWindowFocus(window* window, RESULT* result) {
     ::crystalRequestWindowFocus(window, result);
