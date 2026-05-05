@@ -24,7 +24,6 @@ extern "C" {
 
 typedef struct CRYSTALwindow CRYSTALwindow;
 
-/* TODO: Remove the content of "CRYSTALnative" and add platform-specific calls to retrieve native handles */
 typedef struct CRYSTALnative {
     CATALYST_NUINT primary; /* Primary native handle (HWND, NSWindow*, etc) */
     CATALYST_NUINT secondary; /* Secondary native handle (HINSTANCE, NSApplication*, etc) */
@@ -49,13 +48,6 @@ enum {
     CRYSTAL_PROPERTIES_STATE_MAXIMIZED      = 0x08,
     CRYSTAL_PROPERTIES_STATE_VISIBLE        = 0x10,
     CRYSTAL_PROPERTIES_STATE_HIDDEN         = 0x20
-};
-
-typedef CATALYST_BYTE CRYSTAL_CONTENT_MODE;
-enum {
-    CRYSTAL_CONTENT_MODE_DEFAULT  = 0x00,
-    CRYSTAL_CONTENT_MODE_INTERNAL = 0x01,
-    CRYSTAL_CONTENT_MODE_EXTERNAL = 0x02
 };
 
 typedef CATALYST_NUINT (*CRYSTALwindowErroredCallback) (CRYSTALwindow* window);
@@ -85,9 +77,6 @@ CRYSTAL_API void crystalSetWindowSizeLimits(CRYSTALwindow* window, CATALYST_NUIN
 CRYSTAL_API void crystalGetWindowSizeLimits(CRYSTALwindow* window, CATALYST_NUINT* minWidth, CATALYST_NUINT* minHeight, CATALYST_NUINT* maxWidth, CATALYST_NUINT* maxHeight, CATALYST_RESULT* result);
 CRYSTAL_API void crystalSetWindowStyle(CRYSTALwindow* window, CRYSTAL_PROPERTIES_STYLE style, CATALYST_RESULT* result);
 CRYSTAL_API void crystalGetWindowStyle(CRYSTALwindow* window, CRYSTAL_PROPERTIES_STYLE* style, CATALYST_RESULT* result);
-/* TODO: Implement */
-/* CRYSTAL_API void crystalSetWindowContentMode(CRYSTALwindow* window, CRYSTAL_CONTENT_MODE mode, CATALYST_RESULT* result); */
-/* CRYSTAL_API void crystalGetWindowContentMode(CRYSTALwindow* window, CRYSTAL_CONTENT_MODE* mode, CATALYST_RESULT* result); */
 CRYSTAL_API void crystalRequestWindowFocus(CRYSTALwindow* window, CATALYST_RESULT* result);
 CRYSTAL_API void crystalRequestWindowAttention(CRYSTALwindow* window, CATALYST_RESULT* result);
 CRYSTAL_API void crystalMinimizeWindow(CRYSTALwindow* window, CATALYST_RESULT* result);
