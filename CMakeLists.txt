@@ -92,62 +92,62 @@ configure_target(
         CATMMLIB_SHARED
         CATTELIB_SHARED
 )
-if(TARGET_PLATFORM_DARWIN)
-    configure_target(
-        TARGETS CRYSTAL_SHARED CRYSTAL_STATIC
-        SOURCES
-            src/modules/crystal/CRYSTAL.darwin.mm
-        DEPENDS
-            "-framework Cocoa"
-    )
-elseif(TARGET_PLATFORM_WIN32)
-    configure_target(
-        TARGETS CRYSTAL_SHARED CRYSTAL_STATIC
-        SOURCES
-            src/modules/crystal/CRYSTAL.win32.cpp
-    )
-elseif(TARGET_PLATFORM_LINUX)
-    add_library(CRYSTAL_X11_SHARED SHARED)
-    add_library(CRYSTAL_X11_STATIC STATIC)
-    configure_target(
-        NAME CRYSTAL-x11
-        TARGETS CRYSTAL_X11_SHARED CRYSTAL_X11_STATIC
-        SOURCES
-            src/modules/crystal/CRYSTAL.linux.x11.cpp
-        DEPENDS
-            CATMMLIB_SHARED
-            CATTELIB_SHARED
-            "X11::X11"
-    )
+# if(TARGET_PLATFORM_DARWIN)
+#     configure_target(
+#         TARGETS CRYSTAL_SHARED CRYSTAL_STATIC
+#         SOURCES
+#             src/modules/crystal/CRYSTAL.darwin.mm
+#         DEPENDS
+#             "-framework Cocoa"
+#     )
+# elseif(TARGET_PLATFORM_WIN32)
+#     configure_target(
+#         TARGETS CRYSTAL_SHARED CRYSTAL_STATIC
+#         SOURCES
+#             src/modules/crystal/CRYSTAL.win32.cpp
+#     )
+# elseif(TARGET_PLATFORM_LINUX)
+#     add_library(CRYSTAL_X11_SHARED SHARED)
+#     add_library(CRYSTAL_X11_STATIC STATIC)
+#     configure_target(
+#         NAME CRYSTAL-x11
+#         TARGETS CRYSTAL_X11_SHARED CRYSTAL_X11_STATIC
+#         SOURCES
+#             src/modules/crystal/CRYSTAL.linux.x11.cpp
+#         DEPENDS
+#             CATMMLIB_SHARED
+#             CATTELIB_SHARED
+#             "X11::X11"
+#     )
 
-    add_library(CRYSTAL_WAYLAND_SHARED SHARED)
-    add_library(CRYSTAL_WAYLAND_STATIC STATIC)
-    configure_target(
-        NAME CRYSTAL-wayland
-        TARGETS CRYSTAL_WAYLAND_SHARED CRYSTAL_WAYLAND_STATIC
-        SOURCES
-            src/modules/crystal/CRYSTAL.linux.wayland.cpp
-            "${WAYLAND_XDG_SHELL_SOURCE}"
-            "${WAYLAND_XDG_SHELL_HEADER}"
-            "${WAYLAND_XDG_DECORATION_SOURCE}"
-            "${WAYLAND_XDG_DECORATION_HEADER}"
-        DEPENDS
-            CATMMLIB_SHARED
-            CATTELIB_SHARED
-            "PkgConfig::WAYLAND_CLIENT"
-    )
+#     add_library(CRYSTAL_WAYLAND_SHARED SHARED)
+#     add_library(CRYSTAL_WAYLAND_STATIC STATIC)
+#     configure_target(
+#         NAME CRYSTAL-wayland
+#         TARGETS CRYSTAL_WAYLAND_SHARED CRYSTAL_WAYLAND_STATIC
+#         SOURCES
+#             src/modules/crystal/CRYSTAL.linux.wayland.cpp
+#             "${WAYLAND_XDG_SHELL_SOURCE}"
+#             "${WAYLAND_XDG_SHELL_HEADER}"
+#             "${WAYLAND_XDG_DECORATION_SOURCE}"
+#             "${WAYLAND_XDG_DECORATION_HEADER}"
+#         DEPENDS
+#             CATMMLIB_SHARED
+#             CATTELIB_SHARED
+#             "PkgConfig::WAYLAND_CLIENT"
+#     )
 
-    configure_target(
-        TARGETS CRYSTAL_SHARED CRYSTAL_STATIC
-        SOURCES
-            src/modules/crystal/CRYSTAL.linux.cpp
-        DEPENDS
-            CRYSTAL_X11_SHARED
-            CRYSTAL_WAYLAND_SHARED
-    )
-else()
-    message(WARNING "No platform-specific source files configured for CRYSTAL!")
-endif()
+#     configure_target(
+#         TARGETS CRYSTAL_SHARED CRYSTAL_STATIC
+#         SOURCES
+#             src/modules/crystal/CRYSTAL.linux.cpp
+#         DEPENDS
+#             CRYSTAL_X11_SHARED
+#             CRYSTAL_WAYLAND_SHARED
+#     )
+# else()
+#     message(WARNING "No platform-specific source files configured for CRYSTAL!")
+# endif()
 
 # TEST
 if(EXISTS "${CMAKE_SOURCE_DIR}/test")

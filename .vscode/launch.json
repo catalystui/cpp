@@ -6,6 +6,13 @@
             "name": "Debug (gdb)",
             "program": "${command:cmake.launchTargetPath}",
             "cwd": "${workspaceRoot}"
+        },
+        {
+            "type": "lldb-dap",
+            "request": "launch",
+            "name": "Debug (lldb)",
+            "program": "${command:cmake.launchTargetPath}",
+            "cwd": "${workspaceRoot}"
         }
     ]
 }
