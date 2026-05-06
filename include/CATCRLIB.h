@@ -49,10 +49,20 @@ typedef CATALYST_BYTE CATALYST_BOOL;
 #if TARGET_SIZEOF_VOID_P == 1
     typedef CATALYST_SBYTE  CATALYST_NINT;
     typedef CATALYST_BYTE   CATALYST_NUINT;
+
+    #define CATALYST_NINT_MIN  CATALYST_SBYTE_MIN
+    #define CATALYST_NINT_MAX  CATALYST_SBYTE_MAX
+    #define CATALYST_NUINT_MIN CATALYST_BYTE_MIN
+    #define CATALYST_NUINT_MAX CATALYST_BYTE_MAX
 #elif TARGET_SIZEOF_VOID_P == 2
     #if CATCRLIB_SUPPORTS_16BIT
         typedef CATALYST_SHORT  CATALYST_NINT;
         typedef CATALYST_USHORT CATALYST_NUINT;
+
+        #define CATALYST_NINT_MIN  CATALYST_SHORT_MIN
+        #define CATALYST_NINT_MAX  CATALYST_SHORT_MAX
+        #define CATALYST_NUINT_MIN CATALYST_USHORT_MIN
+        #define CATALYST_NUINT_MAX CATALYST_USHORT_MAX
     #else
         #error "CATCRLIB.h :: Unsupported Platform :: Compiler specifies 16-bit pointers but no 16-bit integer type exists."
     #endif
@@ -60,6 +70,11 @@ typedef CATALYST_BYTE CATALYST_BOOL;
     #if CATCRLIB_SUPPORTS_32BIT
         typedef CATALYST_INT    CATALYST_NINT;
         typedef CATALYST_UINT   CATALYST_NUINT;
+
+        #define CATALYST_NINT_MIN  CATALYST_INT_MIN
+        #define CATALYST_NINT_MAX  CATALYST_INT_MAX
+        #define CATALYST_NUINT_MIN CATALYST_UINT_MIN
+        #define CATALYST_NUINT_MAX CATALYST_UINT_MAX
     #else
         #error "CATCRLIB.h :: Unsupported Platform :: Compiler specifies 32-bit pointers but no 32-bit integer type exists."
     #endif
@@ -67,6 +82,11 @@ typedef CATALYST_BYTE CATALYST_BOOL;
     #if CATCRLIB_SUPPORTS_64BIT
         typedef CATALYST_LONG   CATALYST_NINT;
         typedef CATALYST_ULONG  CATALYST_NUINT;
+
+        #define CATALYST_NINT_MIN  CATALYST_LONG_MIN
+        #define CATALYST_NINT_MAX  CATALYST_LONG_MAX
+        #define CATALYST_NUINT_MIN CATALYST_ULONG_MIN
+        #define CATALYST_NUINT_MAX CATALYST_ULONG_MAX
     #else
         #error "CATCRLIB.h :: Unsupported Platform :: Compiler specifies 64-bit pointers but no 64-bit integer type exists."
     #endif
